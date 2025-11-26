@@ -1,1 +1,429 @@
-<!-- The content of builder_compare.html needs to be included here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Build Time Helper Comparison</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      padding: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+      color: #f9fafb;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      border: 1px solid #1f2937;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .field-group-title {
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #e5e7eb;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      display: block;
+    }
+
+    input {
+      background: #020617;
+      border-radius: 0.5rem;
+      border: 1px solid #374151;
+      padding: 0.4rem 0.55rem;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.5);
+    }
+
+    .inline-input {
+      max-width: 90px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin: 0.5rem 0 1rem;
+      align-items: center;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid #22c55e;
+      background: #16a34a;
+      color: white;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    button:hover {
+      background: #22c55e;
+    }
+
+    button.secondary {
+      background: #020617;
+      border-color: #4b5563;
+      color: #e5e7eb;
+    }
+
+    button.secondary:hover {
+      border-color: #9ca3af;
+    }
+
+    .break-even {
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    .break-even span {
+      font-weight: 600;
+      color: #4ade80;
+    }
+
+    canvas {
+      background: #020617;
+      border-radius: 0.75rem;
+      border: 1px solid #111827;
+    }
+
+    .error {
+      color: #f97373;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Build Time Helper Comparison</h1>
+    <p class="subtitle">
+      Compare a fixed time reduction (e.g. <code>30 × 27m36s</code>)
+      against a multiplicative reduction (e.g. <code>32 × 0.5% per helper</code>).
+      The chart shows the resulting build time and the break-even point.
+    </p>
+
+    <div class="card">
+      <div class="grid">
+        <!-- Fixed setup -->
+        <div>
+          <div class="field-group-title">Fixed reduction setup</div>
+          <div class="field-row">
+            <div>
+              <label for="fixedHelpers">Helpers (fixed)</label>
+              <input id="fixedHelpers" type="number" min="1" value="30" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="fixedMinutes">Minutes per helper</label>
+              <input id="fixedMinutes" class="inline-input" type="number" min="0" value="27" />
+            </div>
+            <div>
+              <label for="fixedSeconds">Seconds per helper</label>
+              <input id="fixedSeconds" class="inline-input" type="number" min="0" max="59" value="36" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Percent setup -->
+        <div>
+          <div class="field-group-title">Percent reduction setup</div>
+          <div class="field-row">
+            <div>
+              <label for="percentHelpers">Helpers (percent)</label>
+              <input id="percentHelpers" type="number" min="1" value="32" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="percentPerHelper">Percent per helper</label>
+              <input id="percentPerHelper" class="inline-input" type="text" value="0.5" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <span style="font-size:0.8rem;color:#9ca3af;">(e.g. 0.5 or 0,5)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Global options -->
+        <div>
+          <div class="field-group-title">Chart options</div>
+          <div class="field-row">
+            <div>
+              <label for="maxDays">Max range (days)</label>
+              <input id="maxDays" type="number" min="1" value="10" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="pointsCount">Curve resolution (points)</label>
+              <input id="pointsCount" type="number" min="100" max="5000" value="1000" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="plotBtn">
+          ▶ Generate plot
+        </button>
+        <button id="autoRangeBtn" class="secondary">
+          Auto-range to break-even
+        </button>
+        <div class="break-even" id="breakEvenText">
+          Break-even: <span>–</span>
+        </div>
+      </div>
+      <div class="error" id="errorText"></div>
+
+      <canvas id="chart" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const chartCanvas = document.getElementById('chart');
+    const breakEvenText = document.getElementById('breakEvenText').querySelector('span');
+    const errorText = document.getElementById('errorText');
+
+    let chartInstance = null;
+
+    function parsePercent(val) {
+      if (typeof val !== 'string') return val;
+      // allow "0,5" as well as "0.5"
+      return parseFloat(val.replace(',', '.'));
+    }
+
+    function formatTime(seconds) {
+      seconds = Math.max(0, Math.round(seconds));
+      const d = Math.floor(seconds / 86400);
+      const h = Math.floor((seconds % 86400) / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return `${d}d ${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m`;
+    }
+
+    function generateData() {
+      errorText.textContent = '';
+
+      const fixedHelpers   = Number(document.getElementById('fixedHelpers').value);
+      const fixedMinutes   = Number(document.getElementById('fixedMinutes').value);
+      const fixedSeconds   = Number(document.getElementById('fixedSeconds').value);
+      const percentHelpers = Number(document.getElementById('percentHelpers').value);
+      const percentPerHelper = parsePercent(
+        document.getElementById('percentPerHelper').value
+      );
+      const maxDays        = Number(document.getElementById('maxDays').value);
+      const pointsCount    = Number(document.getElementById('pointsCount').value);
+
+      if (fixedHelpers <= 0 || percentHelpers <= 0 || percentPerHelper <= 0) {
+        errorText.textContent = 'All helper counts and percent per helper must be positive.';
+        return null;
+      }
+
+      const reductionA = fixedHelpers * (fixedMinutes * 60 + fixedSeconds);
+      const factorB = Math.pow(1 - percentPerHelper / 100, percentHelpers);
+
+      if (factorB <= 0 || factorB >= 1) {
+        errorText.textContent = 'Percent per helper must be between 0 and 100 (but not 0 or 100).';
+        return null;
+      }
+
+      // Analytic break-even: T - reductionA = T * factorB
+      const crossover = reductionA / (1 - factorB);
+
+      const tMin = 0;
+      const tMax = Math.max(maxDays * 24 * 3600, crossover * 1.1);
+      const step = (tMax - tMin) / (pointsCount - 1);
+
+      const labels = [];
+      const fixedData = [];
+      const percentData = [];
+
+      for (let i = 0; i < pointsCount; i++) {
+        const t = tMin + i * step;          // original time in seconds
+        const tFixed   = Math.max(0, t - reductionA);
+        const tPercent = t * factorB;
+
+        labels.push(t);
+        fixedData.push(tFixed / 60);   // minutes
+        percentData.push(tPercent / 60);
+      }
+
+      return { labels, fixedData, percentData, crossover };
+    }
+
+    function createChart() {
+      const data = generateData();
+      if (!data) return;
+
+      const { labels, fixedData, percentData, crossover } = data;
+
+      // Update break-even text
+      if (crossover > 0) {
+        breakEvenText.textContent = formatTime(crossover);
+      } else {
+        breakEvenText.textContent = 'no positive break-even (percent or fixed always better)';
+      }
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Fixed reduction',
+              data: fixedData,
+              borderWidth: 2,
+              tension: 0.15,
+            },
+            {
+              label: 'Percent reduction',
+              data: percentData,
+              borderWidth: 2,
+              borderDash: [6, 4],
+              tension: 0.15,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          animation: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Original build time (d hh:mm)'
+              },
+              ticks: {
+                callback: (value, index, ticks) => {
+                  const seconds = chartInstance.data.labels[index];
+                  return formatTime(seconds);
+                },
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 8
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Resulting build time (minutes)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e5e7eb'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  if (!items.length) return '';
+                  const seconds = items[0].parsed.x;
+                  return 'Original: ' + formatTime(seconds);
+                },
+                label: (ctx) => {
+                  return `${ctx.dataset.label}: ${ctx.formattedValue} min`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    document.getElementById('plotBtn').addEventListener('click', createChart);
+
+    document.getElementById('autoRangeBtn').addEventListener('click', () => {
+      const data = generateData();
+      if (!data) return;
+      const { crossover } = data;
+      const maxDaysInput = document.getElementById('maxDays');
+      if (crossover > 0) {
+        const days = Math.max(1, Math.ceil((crossover * 1.5) / 86400));
+        maxDaysInput.value = days;
+      }
+      createChart();
+    });
+
+    // Initial plot on load
+    createChart();
+  </script>
+</body>
+</html><!-- The content of builder_compare.html needs to be included here -->
