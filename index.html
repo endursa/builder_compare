@@ -16,7 +16,7 @@
     .subtitle { color:#9ca3af; margin-bottom:1.5rem; font-size:0.9rem; }
     .card { background:#020617; border-radius:1rem; padding:1.25rem; box-shadow:0 20px 40px rgba(0,0,0,0.4); border:1px solid #1f2937; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1rem; margin-bottom:1rem; }
-    .field-group-title { font-weight:600; margin-bottom:0.4rem; color:#e5e7eb; }
+    .field-group-title { font-weight:600; margin-bottom:0.4rem; color:#e5e7eb; display:flex; align-items:center; gap:0.5rem; }
     .field-row { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.35rem; }
     label { font-size:0.8rem; color:#9ca3af; display:block; }
     input, .small-text { background:#020617; border-radius:0.5rem; border:1px solid #374151; padding:0.4rem 0.55rem; color:#e5e7eb; font-size:0.85rem; width:100%; box-sizing:border-box; }
@@ -41,7 +41,7 @@
     <h1>Last War - Build Time Comparison</h1>
     <p class="subtitle">
       Vergleiche zwei feste Reduktionen gegen eine prozentuale Reduktion (fest auf <strong>0.5%</strong> pro Helper).
-      Fixed-Setup 2 ist per Checkbox ein- und ausschaltbar. Tooltips und Achsen zeigen Zeiten einheitlich als <code>d hh:mm</code>.
+      Fixed-Setup 2 ist per Checkbox ein- und ausschaltbar (Checkbox sitzt neben dem Titel und ist standardmäßig deaktiviert). Tooltips und Achsen zeigen Zeiten einheitlich als <code>d hh:mm</code>.
     </p>
 
     <div class="card">
@@ -81,15 +81,16 @@
           </div>
         </div>
         
-        <!-- Fixed setup 2 with toggle -->
+        <!-- Fixed setup 2 with checkbox next to title (default disabled) -->
         <div>
-          <div class="field-row">
-            <div class="field-group-title">Fixed reduction setup 2</div>
-            <div class="field-row checkbox-row">
-              <input id="enableFixed2" type="checkbox" checked />
-              <label for="enableFixed2" style="margin:0;">Fixed 2 aktiv</label>
-            </div>
+          <div class="field-group-title">
+            <span>Fixed reduction setup 2</span>
+            <label class="checkbox-row" style="margin-left:auto;">
+              <input id="enableFixed2" type="checkbox" />
+              <span style="margin-left:6px;color:#9ca3af;font-size:0.9rem;">Fixed 2 aktiv</span>
+            </label>
           </div>
+
           <div class="field-row">
             <div>
               <label for="fixedHelpers2">Helpers (fixed 2)</label>
@@ -148,6 +149,11 @@
     const fixedHelpers2El = document.getElementById('fixedHelpers2');
     const fixedMinutes2El = document.getElementById('fixedMinutes2');
     const fixedSeconds2El = document.getElementById('fixedSeconds2');
+
+    // default: Fixed2 disabled, inputs disabled
+    fixedHelpers2El.disabled = true;
+    fixedMinutes2El.disabled = true;
+    fixedSeconds2El.disabled = true;
 
     // toggle inputs for fixed2 when checkbox changes
     enableFixed2El.addEventListener('change', () => {
@@ -249,6 +255,7 @@
     }
 
     // Plugin: zeichnet vertikale Linien an den angegebenen x-Werten (Sekunden)
+    // plus intelligente Label-Verlagerung, falls sich mehrere Labels überlappen könnten.
     const verticalLinePlugin = {
       id: 'verticalLines',
       afterDraw: (chart) => {
@@ -259,10 +266,54 @@
         const top = chart.chartArea.top;
         const bottom = chart.chartArea.bottom;
 
-        breakpoints.forEach(v => {
-          if (!v || typeof v.x !== 'number') return;
-          if (v.x < xScale.min || v.x > xScale.max) return;
-          const px = xScale.getPixelForValue(v.x);
+        // compute pixel positions and label widths first
+        const items = breakpoints
+          .filter(v => v && typeof v.x === 'number' && v.x >= xScale.min && v.x <= xScale.max)
+          .map(v => {
+            const px = xScale.getPixelForValue(v.x);
+            const lbl = (v.label || '') + ' — ' + formatTime(v.x);
+            ctx.font = v.font || '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
+            const w = ctx.measureText(lbl).width;
+            return { v, px, lbl, w };
+          });
+
+        // sort by px (left to right)
+        items.sort((a, b) => a.px - b.px);
+
+        // resolve overlaps: if two labels are too close, shift the second one up/down or left
+        const placed = [];
+        const minGap = 8; // minimal horizontal gap in px between label boxes
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          // default text position: right of the line
+          let textX = it.px + 6;
+          let textY = top + 14;
+          // if it would overlap previous placed label horizontally, try left side or shift vertically
+          if (placed.length) {
+            const prev = placed[placed.length - 1];
+            const prevLeft = prev.textX;
+            const prevRight = prev.textX + prev.w;
+            // check if current textX would overlap prev
+            if (!(textX > prevRight + minGap || (textX + it.w) < prevLeft - minGap)) {
+              // attempt place on left of the line
+              const leftX = it.px - 6 - it.w;
+              if (leftX > 6) {
+                textX = leftX;
+                textY = top + 14;
+              } else {
+                // else shift vertically alternating up / down
+                const offsetY = (placed.length % 2 === 0) ? -6 : 20;
+                textY = top + 14 + offsetY;
+              }
+            }
+          }
+          placed.push({ textX, textY, w: it.w, item: it });
+        }
+
+        // draw lines and labels
+        placed.forEach(p => {
+          const v = p.item.v;
+          const px = p.item.px;
           ctx.save();
           ctx.beginPath();
           ctx.strokeStyle = v.color || '#4ade80';
@@ -272,15 +323,11 @@
           ctx.lineTo(px, bottom);
           ctx.stroke();
 
-          // Label oberhalb
-          if (v.label) {
+          if (p.item.lbl) {
             ctx.setLineDash([]);
-            ctx.font = '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
+            ctx.font = v.font || '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
             ctx.fillStyle = v.color || '#4ade80';
-            const text = v.label + ' — ' + formatTime(v.x);
-            const textX = px + 6;
-            const textY = top + 14;
-            ctx.fillText(text, textX, textY);
+            ctx.fillText(p.item.lbl, p.textX, p.textY);
           }
           ctx.restore();
         });
@@ -411,8 +458,7 @@
       createChart();
     });
 
-    // initial toggle state & initial plot
-    enableFixed2El.dispatchEvent(new Event('change'));
+    // initial: Fixed2 disabled (inputs already disabled), initial plot
     createChart();
   </script>
 </body>
