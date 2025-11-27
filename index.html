@@ -95,16 +95,19 @@
 
         <!-- numeric results -->
         <div class="results-row" id="resultsRow" aria-live="polite">
-          <div class="result-pill" id="resultFixed1">Fixed1: —</div>
-          <div class="result-pill" id="resultFixed2">Fixed2: —</div>
+          <div class="result-pill" id="resultFixed1">Setup 1: —</div>
+          <div class="result-pill" id="resultFixed2">Setup 2: —</div>
           <div class="result-pill" id="resultPercent">Percent: —</div>
         </div>
+        
+        <!-- Recommendation shown below calculated times -->
+        <div class="recommend" id="recommendUnderResults"><strong>Recommendation:</strong> —</div>
       </div>
 
       <div class="grid">
         <!-- Fixed setup 1 -->
         <div>
-          <div class="field-group-title">Fixed time reduction</div>
+          <div class="field-group-title">Setup 1</div>
           <div class="field-row">
             <div>
               <label for="fixedHelpers1">Helpers</label>
@@ -125,13 +128,12 @@
         <!-- Fixed setup 2 with checkbox -->
         <div>
           <div class="field-group-title">
-            <span>Second fixed time</span>
+            <span>Setup 2</span>
             <label class="checkbox-row" style="margin-left:auto;">
               <input id="enableFixed2" type="checkbox" />
               <span style="margin-left:6px;color:#9ca3af;font-size:0.9rem;">enable</span>
             </label>
           </div>
-
           <div class="field-row">
             <div>
               <label for="fixedHelpers2">Helpers</label>
@@ -345,16 +347,16 @@
       // helper helper
       function chooseLowerHelpersHigherReduction() {
         // choose config with lower helpers; if equal choose larger reductionA
-        if (!fixed2enabled) return 'Fixed1';
-        if (fixedHelpers1 < fixedHelpers2) return 'Fixed1';
-        if (fixedHelpers2 < fixedHelpers1) return 'Fixed2';
+        if (!fixed2enabled) return 'Setup 1';
+        if (fixedHelpers1 < fixedHelpers2) return 'Setup 1';
+        if (fixedHelpers2 < fixedHelpers1) return 'Setup 2';
         // equal helpers -> pick one with larger reduction
         return (reductionA1 >= reductionA2) ? 'Fixed1' : 'Fixed2';
       }
       function chooseHigherHelpers() {
         if (!fixed2enabled) return 'Percent (higher-helpers behavior)';
-        if (fixedHelpers1 > fixedHelpers2) return 'Fixed1';
-        if (fixedHelpers2 > fixedHelpers1) return 'Fixed2';
+        if (fixedHelpers1 > fixedHelpers2) return 'Setup 1';
+        if (fixedHelpers2 > fixedHelpers1) return 'Setup 2';
         // equal -> choose larger reduction
         return (reductionA1 >= reductionA2) ? 'Fixed1' : 'Fixed2';
       }
@@ -366,7 +368,7 @@
           return 'Fixed1 (no valid break-even)';
         }
         if (T < crossover1) {
-          return 'Use Fixed1 (below break-even)';
+          return 'Use Setup 1 (below break-even)';
         } else {
           return 'Use percent-based reduction (above break-even)';
         }
@@ -562,8 +564,8 @@
       const resPercent = Math.max(0, T * factorB);
 
       // update numeric result pills
-      resultFixed1.textContent = 'Fixed1: ' + formatTime(resFixed1);
-      resultFixed2.textContent = fixed2enabled ? ('Fixed2: ' + formatTime(resFixed2)) : 'Fixed2: —';
+      resultFixed1.textContent = 'Setup 1: ' + formatTime(resFixed1);
+      resultFixed2.textContent = fixed2enabled ? ('Setup 2: ' + formatTime(resFixed2)) : 'Setup 2: —';
       resultPercent.textContent = 'Percent: ' + formatTime(resPercent);
 
       // Break-even text
@@ -575,16 +577,20 @@
       // decide recommendation and render
       const rec = decideRecommendation(T, Object.assign({}, data));
       recommendText.innerHTML = `<strong>Recommendation:</strong> ${rec}`;
+      
+      // also update the recommendation panel under the numeric results
+      const recUnder = document.getElementById('recommendUnderResults');  
+      if (recUnder) recUnder.innerHTML = `<strong>Recommendation:</strong> ${rec}`;
 
       // breakpoints
       const breakpoints = [];
-      if (crossover1) breakpoints.push({ x: crossover1, color: '#f59e0b', label: 'BE Fixed1' });
-      if (fixed2enabled && crossover2) breakpoints.push({ x: crossover2, color: '#60a5fa', label: 'BE Fixed2' });
+      if (crossover1) breakpoints.push({ x: crossover1, color: '#f59e0b', label: 'BE Setup 1' });
+      if (fixed2enabled && crossover2) breakpoints.push({ x: crossover2, color: '#60a5fa', label: 'BE Setup 2' });
 
       // datasets: curves
       const datasets = [
         {
-          label: 'Fixed reduction 1',
+          label: 'Setup 1',
           data: fixedDataset1,
           borderWidth: 2,
           tension: 0.15,
@@ -596,7 +602,7 @@
       ];
       if (fixed2enabled) {
         datasets.push({
-          label: 'Fixed reduction 2',
+          label: 'Setup 2',
           data: fixedDataset2,
           borderWidth: 2,
           tension: 0.15,
@@ -620,7 +626,7 @@
 
       // marker datasets (single hollow points) — labels as requested
       datasets.push({
-        label: 'Build time fixed',
+        label: 'Build time setup 1',
         data: [{ x: T, y: resFixed1 }],
         showLine: false,
         pointStyle: 'circle',
@@ -647,7 +653,7 @@
 
       if (fixed2enabled) {
         datasets.push({
-          label: 'build time fixed 2',
+          label: 'build time setup 2',
           data: [{ x: T, y: resFixed2 }],
           showLine: false,
           pointStyle: 'circle',
