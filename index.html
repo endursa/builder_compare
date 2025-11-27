@@ -60,7 +60,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Last War - Build Time Comparison</h1>
+    <h1>Last War - Build Time Comparison by Endursa</h1>
     <p class="subtitle">
       Compare two fixed reductions with a percentage-based reduction (fixed at <strong>0.5%</strong> per helper).
       The second fixed setup can be enabled/disabled via the checkbox (next to the title and disabled by default).
@@ -72,7 +72,6 @@
       <div style="margin-bottom:0.75rem;">
         <div class="field-group-title">Original build time</div>
         <div class="field-row time-inputs" style="align-items:center;">
-          <label style="min-width:64px;color:#9ca3af;margin:0;">Enter T</label>
           <div style="display:flex; gap:0.5rem; width:100%; max-width:520px;">
             <div>
               <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Days</label>
@@ -538,45 +537,6 @@
         borderColor: '#4ade80',
         spanGaps: false
       });
-
-      // marker datasets (single points) — appear as dots on the curves at x = T
-      const markerFixed1 = {
-        label: 'Fixed1 @ T',
-        data: [{ x: T, y: resFixed1 }],
-        showLine: false,
-        pointRadius: 6,
-        pointHoverRadius: 8,
-        backgroundColor: '#f59e0b',
-        borderColor: '#f59e0b',
-        order: 999
-      };
-      datasets.push(markerFixed1);
-
-      if (fixed2enabled) {
-        const markerFixed2 = {
-          label: 'Fixed2 @ T',
-          data: [{ x: T, y: resFixed2 }],
-          showLine: false,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          backgroundColor: '#60a5fa',
-          borderColor: '#60a5fa',
-          order: 999
-        };
-        datasets.push(markerFixed2);
-      }
-
-      const markerPercent = {
-        label: 'Percent @ T',
-        data: [{ x: T, y: resPercent }],
-        showLine: false,
-        pointRadius: 6,
-        pointHoverRadius: 8,
-        backgroundColor: '#4ade80',
-        borderColor: '#4ade80',
-        order: 999
-      };
-      datasets.push(markerPercent);
 
       // destroy previous chart if exists
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
