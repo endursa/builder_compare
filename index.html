@@ -67,12 +67,28 @@
           </div>
         </div>
 
+        <!-- Percent setup (fixed 0.5%) -->
+        <div>
+          <div class="field-group-title">Percent reduction setup</div>
+          <div class="field-row">
+            <div>
+              <label for="percentHelpers">Helpers (percent)</label>
+              <input id="percentHelpers" type="number" min="1" value="32" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="muted">Prozent pro Helper: <strong>0.5%</strong></div>
+          </div>
+        </div>
+        
         <!-- Fixed setup 2 with toggle -->
         <div>
-          <div class="field-group-title">Fixed reduction setup 2</div>
-          <div class="field-row checkbox-row">
-            <input id="enableFixed2" type="checkbox" checked />
-            <label for="enableFixed2" style="margin:0;">Fixed 2 aktiv</label>
+          <div class="field-row">
+            <div class="field-group-title">Fixed reduction setup 2</div>
+            <div class="field-row checkbox-row">
+              <input id="enableFixed2" type="checkbox" checked />
+              <label for="enableFixed2" style="margin:0;">Fixed 2 aktiv</label>
+            </div>
           </div>
           <div class="field-row">
             <div>
@@ -91,21 +107,7 @@
             </div>
           </div>
         </div>
-
-        <!-- Percent setup (fixed 0.5%) -->
-        <div>
-          <div class="field-group-title">Percent reduction setup</div>
-          <div class="field-row">
-            <div>
-              <label for="percentHelpers">Helpers (percent)</label>
-              <input id="percentHelpers" type="number" min="1" value="32" />
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="muted">Prozent pro Helper: <strong>0.5%</strong> (fest)</div>
-          </div>
-        </div>
-
+        
         <!-- Chart options -->
         <div>
           <div class="field-group-title">Chart options</div>
