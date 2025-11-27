@@ -21,6 +21,7 @@
     label{ font-size:0.8rem; color:#9ca3af; display:block; }
     input, .small-text{ background:#020617; border-radius:0.5rem; border:1px solid #374151; padding:0.4rem 0.55rem; color:#e5e7eb; font-size:0.85rem; width:100%; box-sizing:border-box; }
     input:focus{ outline:none; border-color:#22c55e; box-shadow:0 0 0 1px rgba(34,197,94,0.5); }
+    input[disabled]{ opacity:0.6; cursor:not-allowed; }
     .inline-input{ max-width:90px; }
     .time-inputs{ display:flex; gap:0.5rem; align-items:center; }
     .time-inputs input{ max-width:90px; text-align:center; }
@@ -121,13 +122,13 @@
           </div>
         </div>
 
-        <!-- Percent setup (fixed 0.5%) -->
+        <!-- Percent setup (fixed 0.5%) - helpers forced to max of fixed helpers -->
         <div>
           <div class="field-group-title">Percent reduction</div>
           <div class="field-row">
             <div>
-              <label for="percentHelpers">Helpers</label>
-              <input id="percentHelpers" type="number" min="1" value="32" />
+              <label for="percentHelpers">Helpers (auto = max of fixed helpers)</label>
+              <input id="percentHelpers" type="number" min="1" value="32" disabled />
             </div>
           </div>
           <div class="field-row">
@@ -172,13 +173,11 @@
               <input id="maxDays" type="number" min="1" value="10" />
             </div>
           </div>
-          <!-- removed curve resolution input as requested -->
         </div>
       </div>
 
       <div class="button-row">
         <button id="plotBtn">▶ Generate plot</button>
-        <button id="autoRangeBtn" class="secondary">Auto-range to break-even</button>
         <div class="break-even" id="breakEvenText">Break-even: <span>–</span></div>
       </div>
 
@@ -198,6 +197,7 @@
     const errorText = document.getElementById('errorText');
 
     const enableFixed2El = document.getElementById('enableFixed2');
+    const fixedHelpers1El = document.getElementById('fixedHelpers1');
     const fixedHelpers2El = document.getElementById('fixedHelpers2');
     const fixedMinutes2El = document.getElementById('fixedMinutes2');
     const fixedSeconds2El = document.getElementById('fixedSeconds2');
@@ -211,6 +211,8 @@
     const resultFixed2 = document.getElementById('resultFixed2');
     const resultPercent = document.getElementById('resultPercent');
 
+    const percentHelpersEl = document.getElementById('percentHelpers');
+
     // default: disable Fixed2 inputs
     fixedHelpers2El.disabled = true;
     fixedMinutes2El.disabled = true;
@@ -221,7 +223,23 @@
       fixedHelpers2El.disabled = !enabled;
       fixedMinutes2El.disabled = !enabled;
       fixedSeconds2El.disabled = !enabled;
+      updatePercentHelpers();
     });
+
+    // update percentHelpers to be max of fixed helpers
+    function updatePercentHelpers() {
+      const h1 = Number(fixedHelpers1El.value) || 0;
+      const h2 = (enableFixed2El.checked) ? (Number(fixedHelpers2El.value) || 0) : 0;
+      const maxH = Math.max(h1, h2, 1);
+      percentHelpersEl.value = String(maxH);
+    }
+
+    // listen for helper changes
+    fixedHelpers1El.addEventListener('input', updatePercentHelpers);
+    fixedHelpers2El.addEventListener('input', updatePercentHelpers);
+
+    // initialize percentHelpers
+    updatePercentHelpers();
 
     let chartInstance = null;
     const FIXED_PERCENT_PER_HELPER = 0.5;
@@ -246,7 +264,7 @@
     function generateData() {
       errorText.textContent = '';
 
-      const fixedHelpers1 = Number(document.getElementById('fixedHelpers1').value);
+      const fixedHelpers1 = Number(fixedHelpers1El.value);
       const fixedMinutes1 = Number(document.getElementById('fixedMinutes1').value);
       const fixedSeconds1 = Number(document.getElementById('fixedSeconds1').value);
 
@@ -255,7 +273,8 @@
       const fixedMinutes2 = Number(fixedMinutes2El.value);
       const fixedSeconds2 = Number(fixedSeconds2El.value);
 
-      const percentHelpers = Number(document.getElementById('percentHelpers').value);
+      // percent helpers is always the max of helpers entered
+      const percentHelpers = Number(percentHelpersEl.value);
       const percentPerHelper = FIXED_PERCENT_PER_HELPER; // fixed
 
       const maxDays = Number(document.getElementById('maxDays').value);
@@ -286,7 +305,6 @@
       const crossover2 = fixed2enabled ? ((1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN) : null;
 
       // AUTO-RANGE: choose tMax so that break-even(s) are visible
-      // Use 1.5× largest positive crossover, but at least maxDays
       const candidates = [maxDays * 24 * 3600];
       if (isFinite(crossover1) && crossover1 > 0) candidates.push(crossover1 * 1.5);
       if (isFinite(crossover2) && crossover2 > 0) candidates.push(crossover2 * 1.5);
@@ -470,6 +488,9 @@
 
     // Create chart and marker datasets; ALWAYS auto-range to break-even
     function createChart() {
+      // ensure percent helpers reflect current helper inputs
+      updatePercentHelpers();
+
       const data = generateData();
       if (!data) return;
       const { fixedDataset1, fixedDataset2, percentDataset, crossover1, crossover2, reductionA1, reductionA2, factorB, fixed2enabled } = data;
@@ -590,11 +611,6 @@
     // wire interactions
     document.getElementById('plotBtn').addEventListener('click', createChart);
     calcBtn.addEventListener('click', createChart);
-
-    document.getElementById('autoRangeBtn').addEventListener('click', () => {
-      // explicit user trigger — keep behavior (will re-run createChart which auto-ranges)
-      createChart();
-    });
 
     // recreate chart on resize with throttling
     let resizeTimer = null;
