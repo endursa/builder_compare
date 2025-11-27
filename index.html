@@ -325,95 +325,101 @@
       return { labels, fixedData, percentData, crossover };
     }
 
-    function createChart() {
-      const data = generateData();
-      if (!data) return;
+   function createChart() {
+    const data = generateData();
+    if (!data) return;
 
-      const { labels, fixedData, percentData, crossover } = data;
+    const { labels, fixedData, percentData, crossover } = data;
 
-      // Update break-even text
-      if (crossover > 0) {
-        breakEvenText.textContent = formatTime(crossover);
-      } else {
-        breakEvenText.textContent = 'no positive break-even (percent or fixed always better)';
-      }
+    // Update break-even text
+    if (crossover > 0) {
+      breakEvenText.textContent = formatTime(crossover);
+    } else {
+      breakEvenText.textContent = 'no positive break-even (percent or fixed always better)';
+    }
 
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
-
-      chartInstance = new Chart(chartCanvas, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Fixed reduction',
-              data: fixedData,
-              borderWidth: 2,
-              tension: 0.15,
-            },
-            {
-              label: 'Percent reduction',
-              data: percentData,
-              borderWidth: 2,
-              borderDash: [6, 4],
-              tension: 0.15,
-            }
-          ]
+    // Destroy previous Chart instance, if any
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+    // Create new Chart
+    chartInstance = new Chart(chartCanvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Fixed reduction',
+            data: fixedData,
+            borderWidth: 2,
+            tension: 0.15,
+            pointRadius: 0,        // helps performance
+            pointHitRadius: 0,     // avoids unnecessary hit detection
+          },
+          {
+            label: 'Percent reduction',
+            data: percentData,
+            borderWidth: 2,
+            borderDash: [6, 4],
+            tension: 0.15,
+            pointRadius: 0,
+            pointHitRadius: 0,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
         },
-        options: {
-          responsive: true,
-          animation: false,
-          interaction: {
-            mode: 'index',
-            intersect: false
-          },
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Original build time (d hh:mm)'
-              },
-              ticks: {
-                callback: (value, index, ticks) => {
-                  const seconds = chartInstance.data.labels[index];
-                  return formatTime(seconds);
-                },
-                maxRotation: 0,
-                autoSkip: true,
-                maxTicksLimit: 8
-              }
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Original build time (d hh:mm)'
             },
-            y: {
-              title: {
-                display: true,
-                text: 'Resulting build time (minutes)'
-              }
+            ticks: {
+              // Use tick value directly!
+              callback: function(value, index, ticks) {
+                return formatTime(value);
+              },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 8
             }
           },
-          plugins: {
-            legend: {
-              labels: {
-                color: '#e5e7eb'
-              }
-            },
-            tooltip: {
-              callbacks: {
-                title: (items) => {
-                  if (!items.length) return '';
-                  const seconds = items[0].parsed.x;
-                  return 'Original: ' + formatTime(seconds);
-                },
-                label: (ctx) => {
-                  return `${ctx.dataset.label}: ${ctx.formattedValue} min`;
-                }
+          y: {
+            title: {
+              display: true,
+              text: 'Resulting build time (minutes)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#e5e7eb'
+            }
+          },
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                if (!items.length) return '';
+                const seconds = items[0].parsed.x;
+                return 'Original: ' + formatTime(seconds);
+              },
+              label: (ctx) => {
+                return `${ctx.dataset.label}: ${ctx.formattedValue} min`;
               }
             }
           }
         }
-      });
-    }
+      }
+    });
+  }
 
     document.getElementById('plotBtn').addEventListener('click', createChart);
 
