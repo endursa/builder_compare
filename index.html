@@ -31,6 +31,8 @@
     button:hover{ background:#22c55e; }
     .break-even{ font-size:0.9rem; color:#e5e7eb; }
     .break-even span{ font-weight:600; color:#4ade80; }
+    .recommend{ margin-left:1rem; font-size:0.9rem; color:#cbd5e1; }
+    .recommend strong{ color:#fef3c7; }
     .error{ color:#f97373; font-size:0.85rem; margin-top:0.25rem; }
     .muted{ font-size:0.85rem; color:#9ca3af; padding:0.45rem 0.55rem; display:inline-block; }
     .results-row{ display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem; }
@@ -54,6 +56,7 @@
       .chart-wrap{ min-height: 260px; height: 50vh; }
       button{ padding:0.35rem 0.9rem; font-size:0.85rem; }
       .results-row{ gap:0.5rem; }
+      .recommend{ display:block; margin-left:0.25rem; margin-top:0.25rem; }
     }
   </style>
 </head>
@@ -119,21 +122,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Percent setup (fixed 0.5%) - helpers forced to max of fixed helpers -->
-        <div>
-          <div class="field-group-title">Percent reduction</div>
-          <div class="field-row">
-            <div>
-              <label for="percentHelpers">Helpers (auto = max of fixed helpers)</label>
-              <input id="percentHelpers" type="number" min="1" value="32" disabled />
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="muted">Percent per helper: <strong>0.5%</strong></div>
-          </div>
-        </div>
-
         <!-- Fixed setup 2 with checkbox -->
         <div>
           <div class="field-group-title">
@@ -161,11 +149,27 @@
             </div>
           </div>
         </div>
+        <!-- Percent setup (fixed 0.5%) - helpers forced to max of fixed helpers -->
+        <div>
+          <div class="field-group-title">Percent reduction</div>
+          <div class="field-row">
+            <div>
+              <label for="percentHelpers">Helpers (auto = max of fixed helpers)</label>
+              <input id="percentHelpers" type="number" min="1" value="32" disabled />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="muted">Percent per helper: <strong>0.5%</strong></div>
+          </div>
+        </div>
       </div>
 
       <div class="button-row">
         <button id="plotBtn">▶ Generate plot</button>
-        <div class="break-even" id="breakEvenText">Break-even: <span>–</span></div>
+        <div style="display:flex;align-items:center;">
+          <div class="break-even" id="breakEvenText">Break-even: <span>–</span></div>
+          <div class="recommend" id="recommendText"><strong>Recommendation:</strong> —</div>
+        </div>
       </div>
 
       <div class="error" id="errorText"></div>
@@ -181,6 +185,7 @@
   <script>
     const chartCanvas = document.getElementById('chart');
     const breakEvenText = document.getElementById('breakEvenText').querySelector('span');
+    const recommendText = document.getElementById('recommendText');
     const errorText = document.getElementById('errorText');
 
     const enableFixed2El = document.getElementById('enableFixed2');
@@ -287,12 +292,11 @@
         return null;
       }
 
-      // analytic break-evens (seconds)
+      // analytic break-evens (seconds) for each fixed vs percent
       const crossover1 = (1 - factorB) !== 0 ? reductionA1 / (1 - factorB) : NaN;
       const crossover2 = fixed2enabled ? ((1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN) : null;
 
       // AUTO-RANGE: choose tMax so that break-even(s) are visible
-      // Use 1.5× largest positive crossover, or fallback to DEFAULT_RANGE_DAYS
       const candidates = [];
       if (isFinite(crossover1) && crossover1 > 0) candidates.push(crossover1 * 1.5);
       if (isFinite(crossover2) && crossover2 > 0) candidates.push(crossover2 * 1.5);
@@ -328,8 +332,75 @@
         reductionA1,
         reductionA2,
         factorB,
-        fixed2enabled
+        fixed2enabled,
+        fixedHelpers1,
+        fixedHelpers2
       };
+    }
+
+    // Decide recommendation string per your rule
+    function decideRecommendation(T, data) {
+      const { crossover1, crossover2, fixedHelpers1, fixedHelpers2, reductionA1, reductionA2, fixed2enabled } = data;
+
+      // helper helper
+      function chooseLowerHelpersHigherReduction() {
+        // choose config with lower helpers; if equal choose larger reductionA
+        if (!fixed2enabled) return 'Fixed1';
+        if (fixedHelpers1 < fixedHelpers2) return 'Fixed1';
+        if (fixedHelpers2 < fixedHelpers1) return 'Fixed2';
+        // equal helpers -> pick one with larger reduction
+        return (reductionA1 >= reductionA2) ? 'Fixed1' : 'Fixed2';
+      }
+      function chooseHigherHelpers() {
+        if (!fixed2enabled) return 'Percent (higher-helpers behavior)';
+        if (fixedHelpers1 > fixedHelpers2) return 'Fixed1';
+        if (fixedHelpers2 > fixedHelpers1) return 'Fixed2';
+        // equal -> choose larger reduction
+        return (reductionA1 >= reductionA2) ? 'Fixed1' : 'Fixed2';
+      }
+
+      // Only one fixed active
+      if (!fixed2enabled) {
+        if (crossover1 == null) {
+          // no meaningful crossover => fallback to percent behavior if factor weird; else choose fixed
+          return 'Fixed1 (no valid break-even)';
+        }
+        if (T < crossover1) {
+          return 'Use Fixed1 (below break-even)';
+        } else {
+          return 'Use percent-based reduction (above break-even)';
+        }
+      }
+
+      // both fixed enabled
+      const c1 = crossover1;
+      const c2 = crossover2;
+      // If neither has valid crossovers, fallback
+      if (!c1 && !c2) return 'No valid break-even points; choose the configuration you prefer.';
+      // If T is below both BE
+      if ((c1 && T < c1) && (c2 && T < c2)) {
+        const pick = chooseLowerHelpersHigherReduction();
+        return `Build time is below both break-evens → recommend ${pick} (lower helpers & higher reduction).`;
+      }
+      // If T above both BE
+      if ((c1 && T > c1) && (c2 && T > c2)) {
+        const pick = chooseHigherHelpers();
+        return `Build time is above both break-evens → recommend ${pick} (higher helper count).`;
+      }
+      // Mixed / between: try to pick fixed whose crossover is still > T (i.e. fixed still better)
+      const candidates = [];
+      if (c1 && T < c1) candidates.push({ id: 'Fixed1', crossover: c1 });
+      if (c2 && T < c2) candidates.push({ id: 'Fixed2', crossover: c2 });
+      if (candidates.length === 1) {
+        return `Build time is between break-evens — recommend ${candidates[0].id} (its break-even is above the build time).`;
+      }
+      if (candidates.length === 2) {
+        // shouldn't happen because handled above, but fallback
+        return 'Build time falls between break-evens — both fixed options could be valid; choose the one with fewer helpers for shorter builds.';
+      }
+      // No fixed prefers fixed at this T — prefer percent/higher-helpers fallback
+      const pick = chooseHigherHelpers();
+      return `Build time falls between break-evens — recommend ${pick} (prefer higher-helpers / percent-based).`;
     }
 
     // vertical lines plugin (stacked labels)
@@ -500,6 +571,10 @@
       if (crossover1) texts.push('Fixed1: ' + formatTime(crossover1));
       if (crossover2) texts.push('Fixed2: ' + formatTime(crossover2));
       breakEvenText.textContent = texts.length ? texts.join(' | ') : 'no positive break-even';
+
+      // decide recommendation and render
+      const rec = decideRecommendation(T, Object.assign({}, data));
+      recommendText.innerHTML = `<strong>Recommendation:</strong> ${rec}`;
 
       // breakpoints
       const breakpoints = [];
