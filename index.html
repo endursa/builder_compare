@@ -138,10 +138,16 @@
       color: #4ade80;
     }
 
+    /* Canvas styling for proper display */
     canvas {
       background: #020617;
       border-radius: 0.75rem;
       border: 1px solid #111827;
+      width: 100%;
+      max-width: 900px;
+      height: 260px;
+      display: block;
+      margin: 0 auto;
     }
 
     .error {
@@ -241,7 +247,8 @@
       </div>
       <div class="error" id="errorText"></div>
 
-      <canvas id="chart" height="260"></canvas>
+      <!-- Set width attribute for canvas -->
+      <canvas id="chart" width="900" height="260"></canvas>
     </div>
   </div>
 
@@ -426,4 +433,4 @@
     createChart();
   </script>
 </body>
-</html><!-- The content of builder_compare.html needs to be included here -->
+</html>
