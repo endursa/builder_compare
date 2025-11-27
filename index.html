@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>Last War - Build Time Comparison</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
@@ -10,12 +10,12 @@
       background: #0f172a;
       color: #e5e7eb;
     }
-    body { margin: 0; padding: 0; display: flex; justify-content: center; }
-    .container { max-width: 1100px; width: 100%; padding: 1.5rem; }
-    h1 { font-size: 1.6rem; margin-bottom: 0.75rem; color: #f9fafb; }
-    .subtitle { color: #9ca3af; margin-bottom: 1.5rem; font-size: 0.9rem; }
-    .card { background: #020617; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border:1px solid #1f2937; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1rem; margin-bottom:1rem; }
+    body { margin:0; padding:0; display:flex; justify-content:center; }
+    .container { max-width:1100px; width:100%; padding:1.5rem; }
+    h1 { font-size:1.6rem; margin-bottom:0.75rem; color:#f9fafb; }
+    .subtitle { color:#9ca3af; margin-bottom:1.5rem; font-size:0.9rem; }
+    .card { background:#020617; border-radius:1rem; padding:1.25rem; box-shadow:0 20px 40px rgba(0,0,0,0.4); border:1px solid #1f2937; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1rem; margin-bottom:1rem; }
     .field-group-title { font-weight:600; margin-bottom:0.4rem; color:#e5e7eb; }
     .field-row { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.35rem; }
     label { font-size:0.8rem; color:#9ca3af; display:block; }
@@ -29,40 +29,65 @@
     button.secondary:hover { border-color:#9ca3af; }
     .break-even { font-size:0.9rem; color:#e5e7eb; }
     .break-even span { font-weight:600; color:#4ade80; }
-    canvas { background:#020617; border-radius:0.75rem; border:1px solid #111827; width:100%; max-width:900px; height:260px; display:block; margin:0 auto; }
+    canvas { background:#020617; border-radius:0.75rem; border:1px solid #111827; width:100%; max-width:900px; height:340px; display:block; margin:0 auto; }
     .error { color:#f97373; font-size:0.85rem; margin-top:0.25rem; }
     @media (max-width:640px) { h1 { font-size:1.25rem; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Last War - Build Time Comparison by Endursa</h1>
+    <h1>Last War - Build Time Comparison</h1>
     <p class="subtitle">
-      Compare a fixed time reduction (z. B. <code>30 × 27m36s</code>) gegen eine prozentuale Reduktion (z. B. <code>32 × 0.5% per helper</code>).
+      Vergleiche feste Reduktionen (z. B. <code>30 × 27m36s</code>) — jetzt mit zwei Fixed-Setups —
+      gegen eine prozentuale Reduktion (z. B. <code>32 × 0.5%</code>). Im Plot werden vertikale Linien an
+      den Break-even-Stellen gezeichnet.
     </p>
 
     <div class="card">
       <div class="grid">
+        <!-- Fixed setup 1 -->
         <div>
-          <div class="field-group-title">Fixed reduction setup</div>
+          <div class="field-group-title">Fixed reduction setup 1</div>
           <div class="field-row">
             <div>
-              <label for="fixedHelpers">Helpers (fixed)</label>
-              <input id="fixedHelpers" type="number" min="1" value="30" />
+              <label for="fixedHelpers1">Helpers (fixed 1)</label>
+              <input id="fixedHelpers1" type="number" min="1" value="30" />
             </div>
           </div>
           <div class="field-row">
             <div>
-              <label for="fixedMinutes">Minutes per helper</label>
-              <input id="fixedMinutes" class="inline-input" type="number" min="0" value="27" />
+              <label for="fixedMinutes1">Minutes per helper</label>
+              <input id="fixedMinutes1" class="inline-input" type="number" min="0" value="27" />
             </div>
             <div>
-              <label for="fixedSeconds">Seconds per helper</label>
-              <input id="fixedSeconds" class="inline-input" type="number" min="0" max="59" value="36" />
+              <label for="fixedSeconds1">Seconds per helper</label>
+              <input id="fixedSeconds1" class="inline-input" type="number" min="0" max="59" value="36" />
             </div>
           </div>
         </div>
 
+        <!-- Fixed setup 2 -->
+        <div>
+          <div class="field-group-title">Fixed reduction setup 2</div>
+          <div class="field-row">
+            <div>
+              <label for="fixedHelpers2">Helpers (fixed 2)</label>
+              <input id="fixedHelpers2" type="number" min="1" value="20" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="fixedMinutes2">Minutes per helper</label>
+              <input id="fixedMinutes2" class="inline-input" type="number" min="0" value="30" />
+            </div>
+            <div>
+              <label for="fixedSeconds2">Seconds per helper</label>
+              <input id="fixedSeconds2" class="inline-input" type="number" min="0" max="59" value="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Percent setup -->
         <div>
           <div class="field-group-title">Percent reduction setup</div>
           <div class="field-row">
@@ -83,6 +108,7 @@
           </div>
         </div>
 
+        <!-- Chart options -->
         <div>
           <div class="field-group-title">Chart options</div>
           <div class="field-row">
@@ -106,11 +132,13 @@
         <div class="break-even" id="breakEvenText">Break-even: <span>–</span></div>
       </div>
       <div class="error" id="errorText"></div>
-      <canvas id="chart" width="900" height="260"></canvas>
+      <canvas id="chart" width="900" height="340"></canvas>
     </div>
   </div>
 
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script>
     const chartCanvas = document.getElementById('chart');
     const breakEvenText = document.getElementById('breakEvenText').querySelector('span');
@@ -138,68 +166,134 @@
       return `${m}m`;
     }
 
+    // Generiert Datensätze und berechnet Break-even Punkte für beide Fixed-Setups
     function generateData() {
       errorText.textContent = '';
 
-      const fixedHelpers   = Number(document.getElementById('fixedHelpers').value);
-      const fixedMinutes   = Number(document.getElementById('fixedMinutes').value);
-      const fixedSeconds   = Number(document.getElementById('fixedSeconds').value);
+      const fixedHelpers1 = Number(document.getElementById('fixedHelpers1').value);
+      const fixedMinutes1 = Number(document.getElementById('fixedMinutes1').value);
+      const fixedSeconds1 = Number(document.getElementById('fixedSeconds1').value);
+
+      const fixedHelpers2 = Number(document.getElementById('fixedHelpers2').value);
+      const fixedMinutes2 = Number(document.getElementById('fixedMinutes2').value);
+      const fixedSeconds2 = Number(document.getElementById('fixedSeconds2').value);
+
       const percentHelpers = Number(document.getElementById('percentHelpers').value);
       const percentPerHelper = parsePercent(document.getElementById('percentPerHelper').value);
-      const maxDays        = Number(document.getElementById('maxDays').value);
-      const pointsCount    = Number(document.getElementById('pointsCount').value);
 
-      if (!(fixedHelpers > 0 && percentHelpers > 0 && percentPerHelper > 0)) {
+      const maxDays = Number(document.getElementById('maxDays').value);
+      const pointsCount = Number(document.getElementById('pointsCount').value);
+
+      if (![fixedHelpers1, fixedHelpers2, percentHelpers, percentPerHelper].every(v => v > 0)) {
         errorText.textContent = 'Alle Helper-Zahlen und Prozentwerte müssen positiv sein.';
         return null;
       }
 
-      const reductionA = fixedHelpers * (fixedMinutes * 60 + fixedSeconds); // seconds
-      const factorB = Math.pow(1 - percentPerHelper / 100, percentHelpers);
+      // Reduktionen in Sekunden
+      const reductionA1 = fixedHelpers1 * (fixedMinutes1 * 60 + fixedSeconds1);
+      const reductionA2 = fixedHelpers2 * (fixedMinutes2 * 60 + fixedSeconds2);
 
+      // Multiplikativer Faktor
+      const factorB = Math.pow(1 - percentPerHelper / 100, percentHelpers);
       if (!(factorB > 0 && factorB < 1)) {
         errorText.textContent = 'Percent per helper muss zwischen 0 und 100 (nicht inkl.) liegen.';
         return null;
       }
 
-      // Analytic break-even (seconds): T - reductionA = T * factorB  =>  T*(1-factorB) = reductionA
-      const crossover = reductionA / (1 - factorB);
+      // Analytische Break-even Punkte (wenn möglich)
+      // T - A = T * factorB  => T = A / (1 - factorB)
+      const crossover1 = (1 - factorB) !== 0 ? reductionA1 / (1 - factorB) : NaN;
+      const crossover2 = (1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN;
 
       const tMin = 0;
-      const tMax = Math.max(maxDays * 24 * 3600, crossover * 1.1);
+      const tMax = Math.max(maxDays * 24 * 3600, (isFinite(crossover1) ? crossover1 : 0) * 1.1, (isFinite(crossover2) ? crossover2 : 0) * 1.1);
       const step = (tMax - tMin) / Math.max(1, pointsCount - 1);
 
-      const points = []; // {x: seconds, y: minutes_fixed} and percent
-
+      const pts = [];
       for (let i = 0; i < pointsCount; i++) {
-        const t = tMin + i * step; // seconds
-        const tFixed = Math.max(0, t - reductionA); // seconds
-        const tPercent = t * factorB; // seconds
-
-        points.push({
+        const t = tMin + i * step; // Sekunden
+        const tFixed1 = Math.max(0, t - reductionA1);
+        const tFixed2 = Math.max(0, t - reductionA2);
+        const tPercent = t * factorB;
+        pts.push({
           x: t,
-          fixedMin: tFixed / 60,
+          fixed1Min: tFixed1 / 60,
+          fixed2Min: tFixed2 / 60,
           percentMin: tPercent / 60
         });
       }
 
-      // Build Chart datasets as arrays of {x,y}
-      const fixedDataset = points.map(p => ({ x: p.x, y: p.fixedMin }));
-      const percentDataset = points.map(p => ({ x: p.x, y: p.percentMin }));
+      const fixedDataset1 = pts.map(p => ({ x: p.x, y: p.fixed1Min }));
+      const fixedDataset2 = pts.map(p => ({ x: p.x, y: p.fixed2Min }));
+      const percentDataset = pts.map(p => ({ x: p.x, y: p.percentMin }));
 
-      return { fixedDataset, percentDataset, crossover };
+      return {
+        fixedDataset1,
+        fixedDataset2,
+        percentDataset,
+        crossover1: (isFinite(crossover1) && crossover1 > 0) ? crossover1 : null,
+        crossover2: (isFinite(crossover2) && crossover2 > 0) ? crossover2 : null
+      };
     }
+
+    // Plugin: zeichnet vertikale Linien an den angegebenen x-Werten (Sekunden)
+    const verticalLinePlugin = {
+      id: 'verticalLines',
+      afterDraw: (chart) => {
+        if (!chart || !chart.config._breakpoints) return;
+        const ctx = chart.ctx;
+        const xScale = chart.scales['x'];
+        const top = chart.chartArea.top;
+        const bottom = chart.chartArea.bottom;
+        const values = chart.config._breakpoints; // array of {x, color, label}
+
+        values.forEach(v => {
+          if (v == null || typeof v.x !== 'number') return;
+          // if outside visible range skip
+          if (v.x < xScale.min || v.x > xScale.max) return;
+          const px = xScale.getPixelForValue(v.x);
+          ctx.save();
+          ctx.beginPath();
+          ctx.strokeStyle = v.color || '#4ade80';
+          ctx.lineWidth = v.width || 2;
+          ctx.setLineDash(v.dash || [6, 4]);
+          ctx.moveTo(px, top);
+          ctx.lineTo(px, bottom);
+          ctx.stroke();
+
+          // label
+          const label = v.label || '';
+          if (label) {
+            ctx.setLineDash([]);
+            ctx.font = '12px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+            ctx.fillStyle = v.color || '#4ade80';
+            const textX = px + 6;
+            const textY = top + 14;
+            ctx.fillText(label, textX, textY);
+          }
+          ctx.restore();
+        });
+      }
+    };
+
+    Chart.register(verticalLinePlugin);
 
     function createChart() {
       const data = generateData();
       if (!data) return;
-      const { fixedDataset, percentDataset, crossover } = data;
 
-      if (crossover > 0) {
-        breakEvenText.textContent = formatTime(crossover);
-      } else {
-        breakEvenText.textContent = 'kein positiver Break-even';
-      }
+      const { fixedDataset1, fixedDataset2, percentDataset, crossover1, crossover2 } = data;
+
+      // Anzeige Break-even Text: beide anzeigen (falls vorhanden)
+      const texts = [];
+      if (crossover1) texts.push('Fixed1: ' + formatTime(crossover1));
+      if (crossover2) texts.push('Fixed2: ' + formatTime(crossover2));
+      breakEvenText.textContent = texts.length ? texts.join(' | ') : 'kein positiver Break-even';
+
+      // Build plugin breakpoint definitions to pass to chart config
+      const breakpoints = [];
+      if (crossover1) breakpoints.push({ x: crossover1, color: '#f59e0b', label: 'BE Fixed1' });
+      if (crossover2) breakpoints.push({ x: crossover2, color: '#60a5fa', label: 'BE Fixed2' });
 
       if (chartInstance) {
         chartInstance.destroy();
@@ -211,12 +305,22 @@
         data: {
           datasets: [
             {
-              label: 'Fixed reduction',
-              data: fixedDataset,
+              label: 'Fixed reduction 1',
+              data: fixedDataset1,
               borderWidth: 2,
               tension: 0.15,
               pointRadius: 0,
               pointHitRadius: 0,
+              borderColor: '#f59e0b'
+            },
+            {
+              label: 'Fixed reduction 2',
+              data: fixedDataset2,
+              borderWidth: 2,
+              tension: 0.15,
+              pointRadius: 0,
+              pointHitRadius: 0,
+              borderColor: '#60a5fa'
             },
             {
               label: 'Percent reduction',
@@ -226,6 +330,7 @@
               tension: 0.15,
               pointRadius: 0,
               pointHitRadius: 0,
+              borderColor: '#4ade80'
             }
           ]
         },
@@ -273,6 +378,10 @@
           }
         }
       });
+
+      // attach breakpoints to chart config for plugin use
+      chartInstance.config._breakpoints = breakpoints;
+      chartInstance.update();
     }
 
     document.getElementById('plotBtn').addEventListener('click', createChart);
@@ -280,16 +389,17 @@
     document.getElementById('autoRangeBtn').addEventListener('click', () => {
       const data = generateData();
       if (!data) return;
-      const { crossover } = data;
-      const maxDaysInput = document.getElementById('maxDays');
-      if (crossover > 0) {
-        const days = Math.max(1, Math.ceil((crossover * 1.5) / 86400));
-        maxDaysInput.value = days;
+      // Wähle max von vorhandenen Break-evens, erweitere etwas
+      const ps = [data.crossover1, data.crossover2].filter(Boolean);
+      if (ps.length) {
+        const maxC = Math.max(...ps);
+        const days = Math.max(1, Math.ceil((maxC * 1.5) / 86400));
+        document.getElementById('maxDays').value = days;
       }
       createChart();
     });
 
-    // Initial plot
+    // initial
     createChart();
   </script>
 </body>
