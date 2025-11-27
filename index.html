@@ -254,8 +254,12 @@
       };
     }
 
-    // Plugin: zeichnet vertikale Linien an den angegebenen x-Werten (Sekunden)
-    // plus intelligente Label-Verlagerung, falls sich mehrere Labels überlappen könnten.
+    /**
+     * Vertical line plugin with non-overlapping label stacking.
+     * - Groups lines that are close in pixel X (cluster threshold)
+     * - Stacks labels vertically inside the chart area for each cluster
+     * - Attempts to place labels right of the line first, or left if not enough space
+     */
     const verticalLinePlugin = {
       id: 'verticalLines',
       afterDraw: (chart) => {
@@ -265,8 +269,10 @@
         const xScale = chart.scales['x'];
         const top = chart.chartArea.top;
         const bottom = chart.chartArea.bottom;
+        const chartLeft = chart.chartArea.left;
+        const chartRight = chart.chartArea.right;
 
-        // compute pixel positions and label widths first
+        // collect visible items with pixel positions and label text
         const items = breakpoints
           .filter(v => v && typeof v.x === 'number' && v.x >= xScale.min && v.x <= xScale.max)
           .map(v => {
@@ -277,43 +283,70 @@
             return { v, px, lbl, w };
           });
 
-        // sort by px (left to right)
+        if (!items.length) return;
+
+        // sort by px
         items.sort((a, b) => a.px - b.px);
 
-        // resolve overlaps: if two labels are too close, shift the second one up/down or left
-        const placed = [];
-        const minGap = 8; // minimal horizontal gap in px between label boxes
-        for (let i = 0; i < items.length; i++) {
-          const it = items[i];
-          // default text position: right of the line
-          let textX = it.px + 6;
-          let textY = top + 14;
-          // if it would overlap previous placed label horizontally, try left side or shift vertically
-          if (placed.length) {
-            const prev = placed[placed.length - 1];
-            const prevLeft = prev.textX;
-            const prevRight = prev.textX + prev.w;
-            // check if current textX would overlap prev
-            if (!(textX > prevRight + minGap || (textX + it.w) < prevLeft - minGap)) {
-              // attempt place on left of the line
-              const leftX = it.px - 6 - it.w;
-              if (leftX > 6) {
+        // cluster items by horizontal proximity (threshold in pixels)
+        const CLUSTER_THRESHOLD = 64; // px; adjust to make clusters tighter/wider
+        const clusters = [];
+        let currentCluster = [items[0]];
+        for (let i = 1; i < items.length; i++) {
+          const prev = items[i - 1];
+          const cur = items[i];
+          if (cur.px - prev.px <= CLUSTER_THRESHOLD) {
+            currentCluster.push(cur);
+          } else {
+            clusters.push(currentCluster);
+            currentCluster = [cur];
+          }
+        }
+        clusters.push(currentCluster);
+
+        // for each cluster, compute stacked y positions and draw
+        clusters.forEach(cluster => {
+          // stack height and gap between stacked labels
+          const LINE_LABEL_GAP = 6;    // gap between text lines vertically
+          const LABEL_LINE_HEIGHT = 14; // approx font height
+          const totalHeight = cluster.length * LABEL_LINE_HEIGHT + (cluster.length - 1) * LINE_LABEL_GAP;
+
+          // prefer placing labels near top; ensure they don't overflow chart area
+          const baseYTop = top + 14; // first label y
+          let startY = baseYTop;
+
+          // if totalHeight would go below chart bottom, shift upward
+          const bottomMost = startY + totalHeight - LABEL_LINE_HEIGHT;
+          if (bottomMost > bottom - 4) {
+            startY -= (bottomMost - (bottom - 4));
+          }
+          // constrain startY not to go above top+6
+          startY = Math.max(startY, top + 6);
+
+          // for each item in cluster, compute textX preference (right of line), fallback left
+          cluster.forEach((it, idx) => {
+            const px = it.px;
+            const textY = startY + idx * (LABEL_LINE_HEIGHT + LINE_LABEL_GAP);
+            // default: right of the line
+            let textX = px + 6;
+            // if label would overflow to the right edge, place left if there's room
+            if (textX + it.w > chartRight - 6) {
+              const leftX = px - 6 - it.w;
+              if (leftX > chartLeft + 6) {
                 textX = leftX;
-                textY = top + 14;
               } else {
-                // else shift vertically alternating up / down
-                const offsetY = (placed.length % 2 === 0) ? -6 : 20;
-                textY = top + 14 + offsetY;
+                // as last resort, clamp label inside chart right edge
+                textX = Math.max(chartLeft + 6, chartRight - it.w - 6);
               }
             }
-          }
-          placed.push({ textX, textY, w: it.w, item: it });
-        }
+            it.drawPos = { textX, textY, px };
+          });
+        });
 
-        // draw lines and labels
-        placed.forEach(p => {
-          const v = p.item.v;
-          const px = p.item.px;
+        // Draw lines and labels (do in second pass so measurements don't interfere)
+        items.forEach(it => {
+          const v = it.v;
+          const px = it.drawPos.px;
           ctx.save();
           ctx.beginPath();
           ctx.strokeStyle = v.color || '#4ade80';
@@ -323,11 +356,12 @@
           ctx.lineTo(px, bottom);
           ctx.stroke();
 
-          if (p.item.lbl) {
+          // label
+          if (it.lbl) {
             ctx.setLineDash([]);
             ctx.font = v.font || '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
             ctx.fillStyle = v.color || '#4ade80';
-            ctx.fillText(p.item.lbl, p.textX, p.textY);
+            ctx.fillText(it.lbl, it.drawPos.textX, it.drawPos.textY);
           }
           ctx.restore();
         });
