@@ -1,51 +1,105 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Last War - Build Time Comparison</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    :root{
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: #0f172a;
       color: #e5e7eb;
     }
-    body { margin:0; padding:0; display:flex; justify-content:center; }
-    .container { max-width:1100px; width:100%; padding:1.5rem; }
-    h1 { font-size:1.6rem; margin-bottom:0.75rem; color:#f9fafb; }
-    .subtitle { color:#9ca3af; margin-bottom:1.5rem; font-size:0.9rem; }
-    .card { background:#020617; border-radius:1rem; padding:1.25rem; box-shadow:0 20px 40px rgba(0,0,0,0.4); border:1px solid #1f2937; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1rem; margin-bottom:1rem; }
-    .field-group-title { font-weight:600; margin-bottom:0.4rem; color:#e5e7eb; display:flex; align-items:center; gap:0.5rem; }
-    .field-row { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.35rem; }
-    label { font-size:0.8rem; color:#9ca3af; display:block; }
-    input, .small-text { background:#020617; border-radius:0.5rem; border:1px solid #374151; padding:0.4rem 0.55rem; color:#e5e7eb; font-size:0.85rem; width:100%; box-sizing:border-box; }
-    input:focus { outline:none; border-color:#22c55e; box-shadow:0 0 0 1px rgba(34,197,94,0.5); }
-    .inline-input { max-width:90px; }
-    .checkbox-row { display:flex; align-items:center; gap:0.5rem; }
-    .button-row { display:flex; gap:0.75rem; flex-wrap:wrap; margin:0.5rem 0 1rem; align-items:center; }
-    button { border-radius:999px; border:1px solid #22c55e; background:#16a34a; color:white; padding:0.45rem 1.1rem; font-size:0.9rem; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:0.3rem; }
-    button:hover { background:#22c55e; }
-    button.secondary { background:#020617; border-color:#4b5563; color:#e5e7eb; }
-    button.secondary:hover { border-color:#9ca3af; }
-    .break-even { font-size:0.9rem; color:#e5e7eb; }
-    .break-even span { font-weight:600; color:#4ade80; }
-    canvas { background:#020617; border-radius:0.75rem; border:1px solid #111827; width:100%; max-width:900px; height:360px; display:block; margin:0 auto; }
-    .error { color:#f97373; font-size:0.85rem; margin-top:0.25rem; }
-    .muted { font-size:0.85rem; color:#9ca3af; padding:0.45rem 0.55rem; display:inline-block; }
-    @media (max-width:640px) { h1 { font-size:1.25rem; } }
+    body{ margin:0; padding:0; display:flex; justify-content:center; }
+    .container{ max-width:1100px; width:100%; padding:1.5rem; }
+    h1{ font-size:1.6rem; margin-bottom:0.75rem; color:#f9fafb; }
+    .subtitle{ color:#9ca3af; margin-bottom:1.0rem; font-size:0.9rem; }
+    .card{ background:#020617; border-radius:1rem; padding:1.25rem; box-shadow:0 20px 40px rgba(0,0,0,0.4); border:1px solid #1f2937; }
+    .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1rem; margin-bottom:1rem; }
+    .field-group-title{ font-weight:600; margin-bottom:0.4rem; color:#e5e7eb; display:flex; align-items:center; gap:0.5rem; }
+    .field-row{ display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.35rem; }
+    label{ font-size:0.8rem; color:#9ca3af; display:block; }
+    input, .small-text{ background:#020617; border-radius:0.5rem; border:1px solid #374151; padding:0.4rem 0.55rem; color:#e5e7eb; font-size:0.85rem; width:100%; box-sizing:border-box; }
+    input:focus{ outline:none; border-color:#22c55e; box-shadow:0 0 0 1px rgba(34,197,94,0.5); }
+    .inline-input{ max-width:90px; }
+    .time-inputs{ display:flex; gap:0.5rem; align-items:center; }
+    .time-inputs input{ max-width:90px; text-align:center; }
+    .checkbox-row{ display:flex; align-items:center; gap:0.5rem; }
+    .button-row{ display:flex; gap:0.75rem; flex-wrap:wrap; margin:0.5rem 0 1rem; align-items:center; }
+    button{ border-radius:999px; border:1px solid #22c55e; background:#16a34a; color:white; padding:0.45rem 1.1rem; font-size:0.9rem; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:0.3rem; }
+    button:hover{ background:#22c55e; }
+    button.secondary{ background:#020617; border-color:#4b5563; color:#e5e7eb; }
+    button.secondary:hover{ border-color:#9ca3af; }
+    .break-even{ font-size:0.9rem; color:#e5e7eb; }
+    .break-even span{ font-weight:600; color:#4ade80; }
+    .error{ color:#f97373; font-size:0.85rem; margin-top:0.25rem; }
+    .muted{ font-size:0.85rem; color:#9ca3af; padding:0.45rem 0.55rem; display:inline-block; }
+    .results-row{ display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem; }
+    .result-pill{ background:#071125; border:1px solid #263247; padding:0.35rem 0.6rem; border-radius:0.5rem; color:#e5e7eb; font-size:0.85rem; }
+    .chart-wrap{
+      position: relative;
+      width: 100%;
+      min-height: 320px;
+      height: 40vh;
+      max-height: 640px;
+      margin: 0 auto;
+    }
+    .chart-wrap canvas{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
+    @media (max-width: 640px){
+      h1{ font-size:1.25rem; }
+      .subtitle{ font-size:0.85rem; }
+      .chart-wrap{ min-height: 260px; height: 50vh; }
+      button{ padding:0.35rem 0.9rem; font-size:0.85rem; }
+      .results-row{ gap:0.5rem; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Last War - Build Time Comparison</h1>
-      <p class="subtitle">
-        Compare two fixed reductions with a percentage-based reduction (fixed at <strong>0.5%</strong> per helper).
-        Fixed setup 2 can be enabled or disabled via a checkbox (located next to the title and disabled by default). 
-        Tooltips and axes display all times consistently in <code>d hh:mm</code> format.
-      </p>
+    <p class="subtitle">
+      Compare two fixed reductions with a percentage-based reduction (fixed at <strong>0.5%</strong> per helper).
+      The second fixed setup can be enabled/disabled via the checkbox (next to the title and disabled by default).
+      Tooltips and axes display all times consistently in <code>d hh:mm</code> format.
+    </p>
 
     <div class="card">
+      <!-- Build time input (days / hours / minutes) -->
+      <div style="margin-bottom:0.75rem;">
+        <div class="field-group-title">Original build time</div>
+        <div class="field-row time-inputs" style="align-items:center;">
+          <label style="min-width:64px;color:#9ca3af;margin:0;">Enter T</label>
+          <div style="display:flex; gap:0.5rem; width:100%; max-width:520px;">
+            <div>
+              <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Days</label>
+              <input id="inputDays" class="inline-input" type="number" min="0" value="0" />
+            </div>
+            <div>
+              <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Hours</label>
+              <input id="inputHours" class="inline-input" type="number" min="0" max="23" value="0" />
+            </div>
+            <div>
+              <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Minutes</label>
+              <input id="inputMinutes" class="inline-input" type="number" min="0" max="59" value="60" />
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button id="calcBtn" style="height:38px;">Calculate results</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- numeric results -->
+        <div class="results-row" id="resultsRow" aria-live="polite">
+          <div class="result-pill" id="resultFixed1">Fixed1: —</div>
+          <div class="result-pill" id="resultFixed2">Fixed2: —</div>
+          <div class="result-pill" id="resultPercent">Percent: —</div>
+        </div>
+      </div>
+
       <div class="grid">
         <!-- Fixed setup 1 -->
         <div>
@@ -81,8 +135,8 @@
             <div class="muted">Percent per helper: <strong>0.5%</strong></div>
           </div>
         </div>
-        
-        <!-- Fixed setup 2 with checkbox next to title (default disabled) -->
+
+        <!-- Fixed setup 2 with checkbox -->
         <div>
           <div class="field-group-title">
             <span>Second fixed time</span>
@@ -109,7 +163,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Chart options -->
         <div>
           <div class="field-group-title">Chart options</div>
@@ -133,14 +187,17 @@
         <button id="autoRangeBtn" class="secondary">Auto-range to break-even</button>
         <div class="break-even" id="breakEvenText">Break-even: <span>–</span></div>
       </div>
+
       <div class="error" id="errorText"></div>
-      <canvas id="chart" width="900" height="360"></canvas>
+
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
     </div>
   </div>
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script>
     const chartCanvas = document.getElementById('chart');
     const breakEvenText = document.getElementById('breakEvenText').querySelector('span');
@@ -151,12 +208,20 @@
     const fixedMinutes2El = document.getElementById('fixedMinutes2');
     const fixedSeconds2El = document.getElementById('fixedSeconds2');
 
-    // default: Fixed2 disabled, inputs disabled
+    // Build time inputs and result displays
+    const inputDays = document.getElementById('inputDays');
+    const inputHours = document.getElementById('inputHours');
+    const inputMinutes = document.getElementById('inputMinutes');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultFixed1 = document.getElementById('resultFixed1');
+    const resultFixed2 = document.getElementById('resultFixed2');
+    const resultPercent = document.getElementById('resultPercent');
+
+    // default: disable Fixed2 inputs
     fixedHelpers2El.disabled = true;
     fixedMinutes2El.disabled = true;
     fixedSeconds2El.disabled = true;
 
-    // toggle inputs for fixed2 when checkbox changes
     enableFixed2El.addEventListener('change', () => {
       const enabled = enableFixed2El.checked;
       fixedHelpers2El.disabled = !enabled;
@@ -165,7 +230,7 @@
     });
 
     let chartInstance = null;
-    const FIXED_PERCENT_PER_HELPER = 0.5; // immer 0.5%
+    const FIXED_PERCENT_PER_HELPER = 0.5;
 
     function formatTime(seconds) {
       seconds = Math.max(0, Math.round(seconds));
@@ -173,6 +238,14 @@
       const h = Math.floor((seconds % 86400) / 3600);
       const m = Math.floor((seconds % 3600) / 60);
       return `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+    }
+
+    // Convert the build-time inputs to seconds
+    function getInputTSeconds() {
+      const d = Math.max(0, Number(inputDays.value) || 0);
+      const h = Math.max(0, Number(inputHours.value) || 0);
+      const m = Math.max(0, Number(inputMinutes.value) || 0);
+      return d * 86400 + h * 3600 + m * 60;
     }
 
     function generateData() {
@@ -188,36 +261,36 @@
       const fixedSeconds2 = Number(fixedSeconds2El.value);
 
       const percentHelpers = Number(document.getElementById('percentHelpers').value);
-      const percentPerHelper = FIXED_PERCENT_PER_HELPER; // fest
+      const percentPerHelper = FIXED_PERCENT_PER_HELPER; // fixed
 
       const maxDays = Number(document.getElementById('maxDays').value);
       const pointsCount = Number(document.getElementById('pointsCount').value);
 
       if (!(fixedHelpers1 > 0 && percentHelpers > 0 && percentPerHelper > 0)) {
-        errorText.textContent = 'Helpers und Prozentwerte müssen positiv sein.';
+        errorText.textContent = 'Helpers and percent values must be positive.';
         return null;
       }
       if (fixed2enabled && !(fixedHelpers2 > 0)) {
-        errorText.textContent = 'Wenn Fixed2 aktiviert ist, muss Fixed2 > 0 sein.';
+        errorText.textContent = 'If Fixed2 is enabled, Fixed2 helpers must be > 0.';
         return null;
       }
 
-      // Reduktionen in Sekunden (A)
+      // reductions in seconds (A)
       const reductionA1 = fixedHelpers1 * (fixedMinutes1 * 60 + fixedSeconds1);
       const reductionA2 = fixed2enabled ? fixedHelpers2 * (fixedMinutes2 * 60 + fixedSeconds2) : 0;
 
-      // Multiplikativer Faktor B (für Prozent)
+      // multiplicative factor B (percent)
       const factorB = Math.pow(1 - percentPerHelper / 100, percentHelpers);
       if (!(factorB > 0 && factorB < 1)) {
-        errorText.textContent = 'Ungültiger Prozentfaktor.';
+        errorText.textContent = 'Invalid percent factor.';
         return null;
       }
 
-      // Analytische Break-evens (Sekunden)
+      // analytic break-evens (seconds)
       const crossover1 = (1 - factorB) !== 0 ? reductionA1 / (1 - factorB) : NaN;
       const crossover2 = fixed2enabled ? ((1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN) : null;
 
-      // Bereich
+      // range for curves
       const candidateMax = Math.max(
         maxDays * 24 * 3600,
         (isFinite(crossover1) ? crossover1 : 0) * 1.1,
@@ -229,8 +302,8 @@
 
       const pts = [];
       for (let i = 0; i < pointsCount; i++) {
-        const t = tMin + i * step; // Original time in Sekunden
-        const tFixed1 = Math.max(0, t - reductionA1); // Ergebnis in Sekunden
+        const t = tMin + i * step; // original time in seconds
+        const tFixed1 = Math.max(0, t - reductionA1); // result in seconds
         const tFixed2 = fixed2enabled ? Math.max(0, t - reductionA2) : null;
         const tPercent = t * factorB;
         pts.push({
@@ -251,16 +324,14 @@
         percentDataset,
         crossover1: (isFinite(crossover1) && crossover1 > 0) ? crossover1 : null,
         crossover2: (isFinite(crossover2) && crossover2 > 0) ? crossover2 : null,
+        reductionA1,
+        reductionA2,
+        factorB,
         fixed2enabled
       };
     }
 
-    /**
-     * Vertical line plugin with non-overlapping label stacking.
-     * - Groups lines that are close in pixel X (cluster threshold)
-     * - Stacks labels vertically inside the chart area for each cluster
-     * - Attempts to place labels right of the line first, or left if not enough space
-     */
+    // vertical lines plugin (stacked labels) — same behavior as before
     const verticalLinePlugin = {
       id: 'verticalLines',
       afterDraw: (chart) => {
@@ -273,7 +344,6 @@
         const chartLeft = chart.chartArea.left;
         const chartRight = chart.chartArea.right;
 
-        // collect visible items with pixel positions and label text
         const items = breakpoints
           .filter(v => v && typeof v.x === 'number' && v.x >= xScale.min && v.x <= xScale.max)
           .map(v => {
@@ -286,78 +356,54 @@
 
         if (!items.length) return;
 
-        // sort by px
-        items.sort((a, b) => a.px - b.px);
+        items.sort((a,b) => a.px - b.px);
 
-        // cluster items by horizontal proximity (threshold in pixels)
-        const CLUSTER_THRESHOLD = 64; // px; adjust to make clusters tighter/wider
+        const CLUSTER_THRESHOLD = 64;
         const clusters = [];
         let currentCluster = [items[0]];
         for (let i = 1; i < items.length; i++) {
           const prev = items[i - 1];
           const cur = items[i];
-          if (cur.px - prev.px <= CLUSTER_THRESHOLD) {
-            currentCluster.push(cur);
-          } else {
-            clusters.push(currentCluster);
-            currentCluster = [cur];
-          }
+          if (cur.px - prev.px <= CLUSTER_THRESHOLD) currentCluster.push(cur);
+          else { clusters.push(currentCluster); currentCluster = [cur]; }
         }
         clusters.push(currentCluster);
 
-        // for each cluster, compute stacked y positions and draw
         clusters.forEach(cluster => {
-          // stack height and gap between stacked labels
-          const LINE_LABEL_GAP = 6;    // gap between text lines vertically
-          const LABEL_LINE_HEIGHT = 14; // approx font height
+          const LINE_LABEL_GAP = 6;
+          const LABEL_LINE_HEIGHT = 14;
           const totalHeight = cluster.length * LABEL_LINE_HEIGHT + (cluster.length - 1) * LINE_LABEL_GAP;
-
-          // prefer placing labels near top; ensure they don't overflow chart area
-          const baseYTop = top + 14; // first label y
+          const baseYTop = top + 14;
           let startY = baseYTop;
-
-          // if totalHeight would go below chart bottom, shift upward
           const bottomMost = startY + totalHeight - LABEL_LINE_HEIGHT;
-          if (bottomMost > bottom - 4) {
-            startY -= (bottomMost - (bottom - 4));
-          }
-          // constrain startY not to go above top+6
+          if (bottomMost > bottom - 4) startY -= (bottomMost - (bottom - 4));
           startY = Math.max(startY, top + 6);
 
-          // for each item in cluster, compute textX preference (right of line), fallback left
           cluster.forEach((it, idx) => {
             const px = it.px;
             const textY = startY + idx * (LABEL_LINE_HEIGHT + LINE_LABEL_GAP);
-            // default: right of the line
             let textX = px + 6;
-            // if label would overflow to the right edge, place left if there's room
             if (textX + it.w > chartRight - 6) {
               const leftX = px - 6 - it.w;
-              if (leftX > chartLeft + 6) {
-                textX = leftX;
-              } else {
-                // as last resort, clamp label inside chart right edge
-                textX = Math.max(chartLeft + 6, chartRight - it.w - 6);
-              }
+              if (leftX > chartLeft + 6) textX = leftX;
+              else textX = Math.max(chartLeft + 6, chartRight - it.w - 6);
             }
             it.drawPos = { textX, textY, px };
           });
         });
 
-        // Draw lines and labels (do in second pass so measurements don't interfere)
         items.forEach(it => {
           const v = it.v;
           const px = it.drawPos.px;
           ctx.save();
           ctx.beginPath();
           ctx.strokeStyle = v.color || '#4ade80';
-          ctx.lineWidth = v.width || 2;
-          ctx.setLineDash(v.dash || [6, 4]);
+          ctx.lineWidth = Math.max(1, (v.width || 2));
+          ctx.setLineDash(v.dash || [6,4]);
           ctx.moveTo(px, top);
           ctx.lineTo(px, bottom);
           ctx.stroke();
 
-          // label
           if (it.lbl) {
             ctx.setLineDash([]);
             ctx.font = v.font || '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
@@ -370,28 +416,93 @@
     };
     Chart.register(verticalLinePlugin);
 
+    function makeChartOptions(width) {
+      const isSmall = width <= 480;
+      const isMedium = width <= 768;
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        devicePixelRatio: Math.max(1, window.devicePixelRatio || 1),
+        interaction: { mode: 'nearest', intersect: false },
+        layout: { padding: { top: 8, right: 8, bottom: 6, left: 6 } },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Original build time (d hh:mm)', color: '#e5e7eb', font: { size: isSmall ? 10 : 12 } },
+            ticks: {
+              callback: function(value){ return formatTime(value); },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: isSmall ? 4 : (isMedium ? 6 : 8),
+              color: '#9ca3af',
+              font: { size: isSmall ? 9 : 11 }
+            },
+            grid: { color: '#0b1220' }
+          },
+          y: {
+            type: 'linear',
+            title: { display: true, text: 'Resulting build time (d hh:mm)', color: '#e5e7eb', font: { size: isSmall ? 10 : 12 } },
+            ticks: {
+              callback: function(value){ return formatTime(value); },
+              color: '#9ca3af',
+              font: { size: isSmall ? 9 : 11 }
+            },
+            grid: { color: '#0b1220' }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: '#e5e7eb', font: { size: isSmall ? 10 : 12 } } },
+          tooltip: {
+            padding: 8,
+            bodySpacing: 6,
+            titleFont: { size: isSmall ? 11 : 13 },
+            bodyFont: { size: isSmall ? 11 : 12 },
+            callbacks: {
+              title: (items) => {
+                if (!items.length) return '';
+                const seconds = items[0].parsed.x;
+                return 'Original: ' + formatTime(seconds);
+              },
+              label: (ctx) => {
+                const seconds = ctx.parsed.y;
+                return `${ctx.dataset.label}: ${formatTime(seconds)}`;
+              }
+            }
+          }
+        }
+      };
+    }
+
+    // Create chart and marker datasets
     function createChart() {
       const data = generateData();
       if (!data) return;
-      const { fixedDataset1, fixedDataset2, percentDataset, crossover1, crossover2, fixed2enabled } = data;
+      const { fixedDataset1, fixedDataset2, percentDataset, crossover1, crossover2, reductionA1, reductionA2, factorB, fixed2enabled } = data;
 
-      // Break-even-Text
+      // compute single-point results for input T
+      const T = getInputTSeconds();
+      const resFixed1 = Math.max(0, T - reductionA1);
+      const resFixed2 = fixed2enabled ? Math.max(0, T - reductionA2) : null;
+      const resPercent = Math.max(0, T * factorB);
+
+      // update numeric result pills
+      resultFixed1.textContent = 'Fixed1: ' + formatTime(resFixed1);
+      resultFixed2.textContent = fixed2enabled ? ('Fixed2: ' + formatTime(resFixed2)) : 'Fixed2: —';
+      resultPercent.textContent = 'Percent: ' + formatTime(resPercent);
+
+      // Break-even text
       const texts = [];
       if (crossover1) texts.push('Fixed1: ' + formatTime(crossover1));
       if (crossover2) texts.push('Fixed2: ' + formatTime(crossover2));
-      breakEvenText.textContent = texts.length ? texts.join(' | ') : 'kein positiver Break-even';
+      breakEvenText.textContent = texts.length ? texts.join(' | ') : 'no positive break-even';
 
-      // Breakpoints für Plugin (nur aktive)
+      // breakpoints
       const breakpoints = [];
       if (crossover1) breakpoints.push({ x: crossover1, color: '#f59e0b', label: 'BE Fixed1' });
       if (fixed2enabled && crossover2) breakpoints.push({ x: crossover2, color: '#60a5fa', label: 'BE Fixed2' });
 
-      if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-      }
-
-      // datasets aufbauen (nur aktive datasets hinzufügen)
+      // datasets: curves
       const datasets = [
         {
           label: 'Fixed reduction 1',
@@ -400,7 +511,8 @@
           tension: 0.15,
           pointRadius: 0,
           pointHitRadius: 0,
-          borderColor: '#f59e0b'
+          borderColor: '#f59e0b',
+          spanGaps: false
         }
       ];
       if (fixed2enabled) {
@@ -411,75 +523,82 @@
           tension: 0.15,
           pointRadius: 0,
           pointHitRadius: 0,
-          borderColor: '#60a5fa'
+          borderColor: '#60a5fa',
+          spanGaps: false
         });
       }
       datasets.push({
         label: 'Percent reduction (0.5% per helper)',
         data: percentDataset,
         borderWidth: 2,
-        borderDash: [6, 4],
+        borderDash: [6,4],
         tension: 0.15,
         pointRadius: 0,
         pointHitRadius: 0,
-        borderColor: '#4ade80'
+        borderColor: '#4ade80',
+        spanGaps: false
       });
+
+      // marker datasets (single points) — appear as dots on the curves at x = T
+      const markerFixed1 = {
+        label: 'Fixed1 @ T',
+        data: [{ x: T, y: resFixed1 }],
+        showLine: false,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        backgroundColor: '#f59e0b',
+        borderColor: '#f59e0b',
+        order: 999
+      };
+      datasets.push(markerFixed1);
+
+      if (fixed2enabled) {
+        const markerFixed2 = {
+          label: 'Fixed2 @ T',
+          data: [{ x: T, y: resFixed2 }],
+          showLine: false,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          backgroundColor: '#60a5fa',
+          borderColor: '#60a5fa',
+          order: 999
+        };
+        datasets.push(markerFixed2);
+      }
+
+      const markerPercent = {
+        label: 'Percent @ T',
+        data: [{ x: T, y: resPercent }],
+        showLine: false,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        backgroundColor: '#4ade80',
+        borderColor: '#4ade80',
+        order: 999
+      };
+      datasets.push(markerPercent);
+
+      // destroy previous chart if exists
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+      // compute options based on wrapper width
+      const wrap = document.querySelector('.chart-wrap');
+      const opts = makeChartOptions(wrap.clientWidth);
 
       chartInstance = new Chart(chartCanvas, {
         type: 'line',
         data: { datasets },
-        options: {
-          responsive: true,
-          animation: false,
-          interaction: { mode: 'nearest', intersect: false },
-          scales: {
-            x: {
-              type: 'linear',
-              title: { display: true, text: 'Original build time (d hh:mm)', color: '#e5e7eb' },
-              ticks: {
-                callback: function(value) { return formatTime(value); },
-                maxRotation: 0,
-                autoSkip: true,
-                maxTicksLimit: 8,
-                color: '#9ca3af'
-              },
-              grid: { color: '#0b1220' }
-            },
-            y: {
-              type: 'linear',
-              title: { display: true, text: 'Resulting build time (d hh:mm)', color: '#e5e7eb' },
-              ticks: {
-                callback: function(value) { return formatTime(value); },
-                color: '#9ca3af'
-              },
-              grid: { color: '#0b1220' }
-            }
-          },
-          plugins: {
-            legend: { labels: { color: '#e5e7eb' } },
-            tooltip: {
-              callbacks: {
-                title: (items) => {
-                  if (!items.length) return '';
-                  const seconds = items[0].parsed.x;
-                  return 'Original: ' + formatTime(seconds);
-                },
-                label: (ctx) => {
-                  const seconds = ctx.parsed.y;
-                  return `${ctx.dataset.label}: ${formatTime(seconds)}`;
-                }
-              }
-            }
-          }
-        }
+        options: opts
       });
 
-      // übergebe Breakpoints an Chart für das Plugin
+      // attach breakpoints for plugin and refresh
       chartInstance.config._breakpoints = breakpoints;
       chartInstance.update();
     }
 
+    // wire interactions
     document.getElementById('plotBtn').addEventListener('click', createChart);
+    calcBtn.addEventListener('click', createChart);
 
     document.getElementById('autoRangeBtn').addEventListener('click', () => {
       const data = generateData();
@@ -493,7 +612,15 @@
       createChart();
     });
 
-    // initial: Fixed2 disabled (inputs already disabled), initial plot
+    // recreate chart on resize with throttling
+    let resizeTimer = null;
+    function handleResize() {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { createChart(); }, 120);
+    }
+    window.addEventListener('resize', handleResize);
+
+    // initial render
     createChart();
   </script>
 </body>
