@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Last War - Build Time Comparison</title>
+  <title>Last War - Build Time Comparison by Endursa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -172,12 +172,7 @@
               <input id="maxDays" type="number" min="1" value="10" />
             </div>
           </div>
-          <div class="field-row">
-            <div>
-              <label for="pointsCount">Curve resolution (points)</label>
-              <input id="pointsCount" type="number" min="100" max="5000" value="1000" />
-            </div>
-          </div>
+          <!-- removed curve resolution input as requested -->
         </div>
       </div>
 
@@ -230,6 +225,7 @@
 
     let chartInstance = null;
     const FIXED_PERCENT_PER_HELPER = 0.5;
+    const DEFAULT_POINTS = 1000; // fixed internal resolution
 
     function formatTime(seconds) {
       seconds = Math.max(0, Math.round(seconds));
@@ -263,7 +259,7 @@
       const percentPerHelper = FIXED_PERCENT_PER_HELPER; // fixed
 
       const maxDays = Number(document.getElementById('maxDays').value);
-      const pointsCount = Number(document.getElementById('pointsCount').value);
+      const pointsCount = DEFAULT_POINTS;
 
       if (!(fixedHelpers1 > 0 && percentHelpers > 0 && percentPerHelper > 0)) {
         errorText.textContent = 'Helpers and percent values must be positive.';
@@ -289,14 +285,13 @@
       const crossover1 = (1 - factorB) !== 0 ? reductionA1 / (1 - factorB) : NaN;
       const crossover2 = fixed2enabled ? ((1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN) : null;
 
-      // range for curves
-      const candidateMax = Math.max(
-        maxDays * 24 * 3600,
-        (isFinite(crossover1) ? crossover1 : 0) * 1.1,
-        (isFinite(crossover2) ? crossover2 : 0) * 1.1
-      );
+      // AUTO-RANGE: choose tMax so that break-even(s) are visible
+      // Use 1.5× largest positive crossover, but at least maxDays
+      const candidates = [maxDays * 24 * 3600];
+      if (isFinite(crossover1) && crossover1 > 0) candidates.push(crossover1 * 1.5);
+      if (isFinite(crossover2) && crossover2 > 0) candidates.push(crossover2 * 1.5);
       const tMin = 0;
-      const tMax = Math.max(candidateMax, 1);
+      const tMax = Math.max(...candidates, 1);
       const step = (tMax - tMin) / Math.max(1, pointsCount - 1);
 
       const pts = [];
@@ -330,7 +325,7 @@
       };
     }
 
-    // vertical lines plugin (stacked labels) — same behavior as before
+    // vertical lines plugin (stacked labels)
     const verticalLinePlugin = {
       id: 'verticalLines',
       afterDraw: (chart) => {
@@ -473,7 +468,7 @@
       };
     }
 
-    // Create chart and marker datasets
+    // Create chart and marker datasets; ALWAYS auto-range to break-even
     function createChart() {
       const data = generateData();
       if (!data) return;
@@ -538,6 +533,42 @@
         spanGaps: false
       });
 
+      // marker datasets (single points) — these place dots on curves at x = T
+      datasets.push({
+        label: 'Fixed1 @ T',
+        data: [{ x: T, y: resFixed1 }],
+        showLine: false,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        backgroundColor: '#f59e0b',
+        borderColor: '#f59e0b',
+        order: 999
+      });
+
+      if (fixed2enabled) {
+        datasets.push({
+          label: 'Fixed2 @ T',
+          data: [{ x: T, y: resFixed2 }],
+          showLine: false,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          backgroundColor: '#60a5fa',
+          borderColor: '#60a5fa',
+          order: 999
+        });
+      }
+
+      datasets.push({
+        label: 'Percent @ T',
+        data: [{ x: T, y: resPercent }],
+        showLine: false,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        backgroundColor: '#4ade80',
+        borderColor: '#4ade80',
+        order: 999
+      });
+
       // destroy previous chart if exists
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
@@ -561,14 +592,7 @@
     calcBtn.addEventListener('click', createChart);
 
     document.getElementById('autoRangeBtn').addEventListener('click', () => {
-      const data = generateData();
-      if (!data) return;
-      const ps = [data.crossover1, data.crossover2].filter(Boolean);
-      if (ps.length) {
-        const maxC = Math.max(...ps);
-        const days = Math.max(1, Math.ceil((maxC * 1.5) / 86400));
-        document.getElementById('maxDays').value = days;
-      }
+      // explicit user trigger — keep behavior (will re-run createChart which auto-ranges)
       createChart();
     });
 
