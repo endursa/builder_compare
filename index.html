@@ -72,11 +72,19 @@ canvas{ width:100%!important; height:100%!important; }
 
 <!-- Original build time -->
 <div class="row">
+ Initial build time:
+</div>
+  
+<div class="row">
   <div><label>Days</label><br><input id="d" class="inline" type="number" value="2"></div>
   <div><label>Hours</label><br><input id="h" class="inline" type="number" value="3"></div>
   <div><label>Minutes</label><br><input id="m" class="inline" type="number" value="40"></div>
 </div>
-
+  
+<div class="row">
+ Reduced build times:
+</div>
+  
 <div class="results">
   <div class="pill" id="res1">Setup 1: —</div>
   <div class="pill" id="res2">Setup 2: —</div>
@@ -95,7 +103,7 @@ canvas{ width:100%!important; height:100%!important; }
 
 <!-- Setup 1 -->
 <div class="row">
-  Setup 1: 
+  Setup 1 (max time purple or gold survivors)
 </div>
   
 <div class="row">
@@ -106,23 +114,20 @@ canvas{ width:100%!important; height:100%!important; }
 
 <!-- Percent -->
 <div class="row">
-  <div><label>Maximum number of helpers</label><br><input id="ph" class="inline" type="number" value="32"></div>
+  <div><label>Maximum number of helpers</label><br><input id="ph" class="inline" type="number" value="38"></div>
   <div class="pill">0.5% / helper</div>
 </div>
 
 <!-- Setup 2 -->
 <div class="row">
+  Setup 2 (all gold survivors, max helps)  
   <label><input id="enable2" type="checkbox"> Enable setup 2</label>
 </div>
 
 <div class="row">
-  Setup 2:
-</div>
-
-<div class="row">
-  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" value="38" disabled></div>
-  <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" value="33" disabled></div>
-  <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" value="42" disabled></div>
+  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" size="10" value="38" disabled></div>
+  <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" size="10" value="33" disabled></div>
+  <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" size="10" value="42" disabled></div>
 </div>
 
 <div class="chart-wrap">
