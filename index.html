@@ -21,11 +21,11 @@ body{
   border-radius:1rem;
   padding:1.25rem;
 }
-.row{ display:flex; gap:.5rem; flex-wrap:wrap; align-items:flex-end; }
+.row{ display:flex; gap:.3rem; flex-wrap:wrap; align-items:flex-end; }
 .inline{ width:90px; text-align:center; }
 label{ font-size:.8rem; color:#9ca3af; }
 input{
-  padding:.4rem .55rem;
+  padding:.4rem .1rem;
   background:#020617;
   border:1px solid #374151;
   border-radius:.5rem;
@@ -80,6 +80,9 @@ canvas{ width:100%!important; height:100%!important; }
   <div><label>Hours</label><br><input id="h" class="inline" type="number" value="3"></div>
   <div><label>Minutes</label><br><input id="m" class="inline" type="number" value="40"></div>
 </div>
+
+<div class="row">
+</div>
   
 <div class="row">
  Reduced build times:
@@ -114,7 +117,7 @@ canvas{ width:100%!important; height:100%!important; }
 
 <!-- Percent -->
 <div class="row">
-  <div><label>Maximum number of helpers</label><br><input id="ph" class="inline" type="number" value="38"></div>
+  <div><label>Max. number of helpers (all gold survivors)</label><br><input id="ph" class="inline" type="number" value="38"></div>
   <div class="pill">0.5% / helper</div>
 </div>
 
@@ -125,9 +128,9 @@ canvas{ width:100%!important; height:100%!important; }
 </div>
 
 <div class="row">
-  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" size="10" value="38" disabled></div>
-  <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" size="10" value="33" disabled></div>
-  <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" size="10" value="42" disabled></div>
+  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" value="38" disabled></div>
+  <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" value="33" disabled></div>
+  <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" value="42" disabled></div>
 </div>
 
 <div class="chart-wrap">
