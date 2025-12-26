@@ -58,7 +58,9 @@ input[disabled]{ opacity:.6; }
   color:#cbd5e1;
 }
 .recommend strong{ color:#fef3c7; }
-
+  
+.hidden { display: none; }
+  
 .chart-wrap{ height:420px; margin-top:1rem; }
 canvas{ width:100%!important; height:100%!important; }
 </style>
@@ -197,7 +199,12 @@ function recalc(){
   const tp = T * factor;
 
   $('res1').textContent = `Setup 1: ${formatTime(t1)}`;
-  $('res2').textContent = h2 ? `Setup 2: ${formatTime(t2)}` : 'Setup 2: —';
+  if (h2) {
+    $('res2').classList.remove('hidden');
+    $('res2').textContent = `Setup 2: ${formatTime(t2)}`;
+  } else {
+    $('res2').classList.add('hidden');
+  }
   $('resp').textContent = `Percent (${ph} helpers): ${formatTime(tp)}`;
 
   const options = [
