@@ -83,7 +83,7 @@ input[disabled]{ opacity:.6; }
   position:relative;
   width:100%;
   height:40vh;
-  min-height:300px;
+  min-height:320px;
   max-height:650px;
 }
 canvas{ width:100%!important; height:100%!important; }
@@ -95,27 +95,15 @@ canvas{ width:100%!important; height:100%!important; }
 <body>
 <div class="container">
 <h1>Last War – Build Time Comparison</h1>
-<p class="subtitle">
-Fixed reductions vs. percentage reduction (0.5% per helper).
-</p>
+<p class="subtitle">Fixed reductions vs. percentage reduction (0.5% per helper).</p>
 
 <div class="card">
 
-<!-- Build time -->
 <div class="title">Original build time</div>
 <div class="row">
-  <div>
-    <label>Days</label><br>
-    <input id="inputDays" class="inline" type="number" min="0" value="2">
-  </div>
-  <div>
-    <label>Hours</label><br>
-    <input id="inputHours" class="inline" type="number" min="0" max="23" value="3">
-  </div>
-  <div>
-    <label>Minutes</label><br>
-    <input id="inputMinutes" class="inline" type="number" min="0" max="59" value="40">
-  </div>
+  <div><label>Days</label><br><input id="inputDays" class="inline" type="number" min="0" value="2"></div>
+  <div><label>Hours</label><br><input id="inputHours" class="inline" type="number" min="0" max="23" value="3"></div>
+  <div><label>Minutes</label><br><input id="inputMinutes" class="inline" type="number" min="0" max="59" value="40"></div>
 </div>
 
 <div class="results">
@@ -124,32 +112,19 @@ Fixed reductions vs. percentage reduction (0.5% per helper).
   <div class="pill" id="resultPercent">Percent: —</div>
 </div>
 
-<div class="recommend" id="recommendText">
-  <strong>Recommendation:</strong> —
-</div>
+<div class="recommend" id="recommendText"><strong>Recommendation:</strong> —</div>
 
 <div class="grid">
 
-<!-- Setup 1 -->
 <div>
   <div class="title">Setup 1</div>
   <div class="row">
-    <div>
-      <label>Helpers</label><br>
-      <input id="fixedHelpers1" class="inline" type="number" min="1" value="30">
-    </div>
-    <div>
-      <label>Min / helper</label><br>
-      <input id="fixedMinutes1" class="inline" type="number" value="39">
-    </div>
-    <div>
-      <label>Sec / helper</label><br>
-      <input id="fixedSeconds1" class="inline" type="number" value="12">
-    </div>
+    <div><label>Helpers</label><br><input id="fixedHelpers1" class="inline" type="number" min="1" value="30"></div>
+    <div><label>Min/helper</label><br><input id="fixedMinutes1" class="inline" type="number" value="39"></div>
+    <div><label>Sec/helper</label><br><input id="fixedSeconds1" class="inline" type="number" value="12"></div>
   </div>
 </div>
 
-<!-- Setup 2 -->
 <div>
   <div class="title">
     Setup 2
@@ -158,39 +133,23 @@ Fixed reductions vs. percentage reduction (0.5% per helper).
     </label>
   </div>
   <div class="row">
-    <div>
-      <label>Helpers</label><br>
-      <input id="fixedHelpers2" class="inline" type="number" min="1" value="32" disabled>
-    </div>
-    <div>
-      <label>Min / helper</label><br>
-      <input id="fixedMinutes2" class="inline" type="number" value="27" disabled>
-    </div>
-    <div>
-      <label>Sec / helper</label><br>
-      <input id="fixedSeconds2" class="inline" type="number" value="36" disabled>
-    </div>
+    <div><label>Helpers</label><br><input id="fixedHelpers2" class="inline" type="number" min="1" value="32" disabled></div>
+    <div><label>Min/helper</label><br><input id="fixedMinutes2" class="inline" type="number" value="27" disabled></div>
+    <div><label>Sec/helper</label><br><input id="fixedSeconds2" class="inline" type="number" value="36" disabled></div>
   </div>
 </div>
 
-<!-- Percent -->
 <div>
   <div class="title">Percent reduction</div>
   <div class="row">
-    <div>
-      <label>Helpers</label><br>
-      <input id="percentHelpers" class="inline" type="number" min="1" value="32">
-    </div>
+    <div><label>Helpers</label><br><input id="percentHelpers" class="inline" type="number" min="1" value="32"></div>
     <div class="pill">0.5% / helper</div>
   </div>
 </div>
 
 </div>
 
-<div class="recommend" id="breakEvenText">
-  <strong>Break-even:</strong> —
-</div>
-
+<div class="recommend" id="breakEvenText"><strong>Break-even:</strong> —</div>
 <div class="error" id="errorText"></div>
 
 <div class="chart-wrap">
@@ -202,6 +161,16 @@ Fixed reductions vs. percentage reduction (0.5% per helper).
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+/* 🔑 REQUIRED FOR CHART.JS v4 */
+Chart.register(
+  Chart.controllers.line,
+  Chart.elements.LineElement,
+  Chart.elements.PointElement,
+  Chart.scales.linear,
+  Chart.plugins.Tooltip,
+  Chart.plugins.Legend
+);
+
 const FIXED_PERCENT = 0.5;
 const POINTS = 800;
 let chart;
@@ -216,16 +185,23 @@ function formatTime(s){
   return `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
 }
 
-function T(){ return (+el('inputDays').value||0)*86400+(+el('inputHours').value||0)*3600+(+el('inputMinutes').value||0)*60; }
+function T(){
+  return (+el('inputDays').value||0)*86400 +
+         (+el('inputHours').value||0)*3600 +
+         (+el('inputMinutes').value||0)*60;
+}
 
 function updatePercentHelpers(){
   if(!el('enableFixed2').checked) return;
-  el('percentHelpers').value=Math.max(+el('fixedHelpers1').value||1,+el('fixedHelpers2').value||1);
+  el('percentHelpers').value=Math.max(
+    +el('fixedHelpers1').value||1,
+    +el('fixedHelpers2').value||1
+  );
 }
 
-function decideRecommendation(Ts,c1,c2,h1,h2){
+function decideRecommendation(Ts,c1,c2){
   if(!el('enableFixed2').checked){
-    return Ts<(c1||Infinity)?"Setup 1":"Percent reduction";
+    return Ts < (c1||Infinity) ? "Setup 1" : "Percent reduction";
   }
   if(c1 && Ts<c1) return "Setup 1";
   if(c2 && Ts<c2) return "Setup 2";
@@ -246,7 +222,6 @@ function createChart(){
 
   let c1=r1/(1-factor);
   let c2=h2?r2/(1-factor):null;
-
   if(h2){
     if(h1<h2) c1=null;
     if(h2<h1) c2=null;
@@ -254,7 +229,6 @@ function createChart(){
 
   const Tmax=Math.max((c1||0)*1.5,(c2||0)*1.5,864000);
   const d1=[],d2=[],dp=[];
-
   for(let i=0;i<POINTS;i++){
     const t=i*Tmax/(POINTS-1);
     d1.push({x:t,y:Math.max(0,t-r1)});
@@ -266,8 +240,7 @@ function createChart(){
   el('resultFixed1').textContent=`Setup 1: ${formatTime(Math.max(0,Ts-r1))}`;
   el('resultFixed2').textContent=h2?`Setup 2: ${formatTime(Math.max(0,Ts-r2))}`:"Setup 2: —";
   el('resultPercent').textContent=`Percent: ${formatTime(Ts*factor)}`;
-
-  el('recommendText').innerHTML=`<strong>Recommendation:</strong> ${decideRecommendation(Ts,c1,c2,h1,h2)}`;
+  el('recommendText').innerHTML=`<strong>Recommendation:</strong> ${decideRecommendation(Ts,c1,c2)}`;
 
   el('breakEvenText').innerHTML=
     `<strong>Break-even:</strong> `+
@@ -284,10 +257,16 @@ function createChart(){
       h2&&{label:'Setup 2',data:d2,borderColor:'#60a5fa',borderWidth:2,pointRadius:0},
       {label:`Percent (${pH} helpers)`,data:dp,borderColor:'#4ade80',borderDash:[6,4],borderWidth:2,pointRadius:0}
     ].filter(Boolean)},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,
-      scales:{x:{type:'linear',ticks:{callback:v=>formatTime(v)}},
-              y:{ticks:{callback:v=>formatTime(v)}}}}
-  );
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false,
+      scales:{
+        x:{type:'linear',ticks:{callback:v=>formatTime(v)}},
+        y:{ticks:{callback:v=>formatTime(v)}}
+      }
+    }
+  });
 }
 
 el('enableFixed2').addEventListener('change',()=>{
