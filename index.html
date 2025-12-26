@@ -212,21 +212,30 @@
     fixedMinutes2El.disabled = true;
     fixedSeconds2El.disabled = true;
 
-    enableFixed2El.addEventListener('change', () => {
-      const enabled = enableFixed2El.checked;
-      fixedHelpers2El.disabled = !enabled;
-      fixedMinutes2El.disabled = !enabled;
-      fixedSeconds2El.disabled = !enabled;
-      updatePercentHelpers();
-    });
+	enableFixed2El.addEventListener('change', () => {
+	  const enabled = enableFixed2El.checked;
+
+	  fixedHelpers2El.disabled = !enabled;
+	  fixedMinutes2El.disabled = !enabled;
+	  fixedSeconds2El.disabled = !enabled;
+
+	  if (enabled) {
+		percentHelpersEl.disabled = true;
+		updatePercentHelpers();
+	  } else {
+		percentHelpersEl.disabled = false;
+	  }
+	});
 
     // update percentHelpers to be max of fixed helpers
-    function updatePercentHelpers() {
-      const h1 = Number(fixedHelpers1El.value) || 0;
-      const h2 = (enableFixed2El.checked) ? (Number(fixedHelpers2El.value) || 0) : 0;
-      const maxH = Math.max(h1, h2, 1);
-      percentHelpersEl.value = String(maxH);
-    }
+	function updatePercentHelpers() {
+	  if (!enableFixed2El.checked) return;
+
+	  const h1 = Number(fixedHelpers1El.value) || 0;
+	  const h2 = Number(fixedHelpers2El.value) || 0;
+	  const maxH = Math.max(h1, h2, 1);
+	  percentHelpersEl.value = String(maxH);
+	}
 
     // listen for helper changes
     fixedHelpers1El.addEventListener('input', updatePercentHelpers);
@@ -234,7 +243,7 @@
 
     // initialize percentHelpers
     updatePercentHelpers();
-
+	percentHelpersEl.disabled = enableFixed2El.checked;
     let chartInstance = null;
     const FIXED_PERCENT_PER_HELPER = 0.5;
     const DEFAULT_POINTS = 1000; // internal resolution
@@ -297,7 +306,17 @@
       // analytic break-evens (seconds) for each fixed vs percent
       const crossover1 = (1 - factorB) !== 0 ? reductionA1 / (1 - factorB) : NaN;
       const crossover2 = fixed2enabled ? ((1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN) : null;
+	  
+	  let effectiveCrossover1 = crossover1;
+	  let effectiveCrossover2 = crossover2;
 
+	  if (fixed2enabled) {
+		if (fixedHelpers1 < fixedHelpers2) {
+			effectiveCrossover1 = null;
+		} else if (fixedHelpers2 < fixedHelpers1) {
+			effectiveCrossover2 = null;
+		}
+	  }
       // AUTO-RANGE: choose tMax so that break-even(s) are visible
       const candidates = [];
       if (isFinite(crossover1) && crossover1 > 0) candidates.push(crossover1 * 1.5);
@@ -325,19 +344,19 @@
       const fixedDataset2 = fixed2enabled ? pts.map(p => ({ x: p.x, y: p.fixed2Sec })) : [];
       const percentDataset = pts.map(p => ({ x: p.x, y: p.percentSec }));
 
-      return {
-        fixedDataset1,
-        fixedDataset2,
-        percentDataset,
-        crossover1: (isFinite(crossover1) && crossover1 > 0) ? crossover1 : null,
-        crossover2: (isFinite(crossover2) && crossover2 > 0) ? crossover2 : null,
-        reductionA1,
-        reductionA2,
-        factorB,
-        fixed2enabled,
-        fixedHelpers1,
-        fixedHelpers2
-      };
+	  return {
+		  fixedDataset1,
+		  fixedDataset2,
+		  percentDataset,
+		  crossover1: effectiveCrossover1,
+		  crossover2: effectiveCrossover2,
+		  reductionA1,
+		  reductionA2,
+		  factorB,
+		  fixed2enabled,
+		  fixedHelpers1,
+		  fixedHelpers2
+	  };
     }
 
     // Decide recommendation string per your rule
@@ -351,14 +370,14 @@
         if (fixedHelpers1 < fixedHelpers2) return 'Setup 1';
         if (fixedHelpers2 < fixedHelpers1) return 'Setup 2';
         // equal helpers -> pick one with larger reduction
-        return (reductionA1 >= reductionA2) ? 'Fixed1' : 'Fixed2';
+        return (reductionA1 >= reductionA2) ? 'Setup 1' : 'Setup 2';
       }
       function chooseHigherHelpers() {
         if (!fixed2enabled) return 'Percent (higher-helpers behavior)';
         if (fixedHelpers1 > fixedHelpers2) return 'Setup 1';
         if (fixedHelpers2 > fixedHelpers1) return 'Setup 2';
         // equal -> choose larger reduction
-        return (reductionA1 >= reductionA2) ? 'Fixed1' : 'Fixed2';
+        return (reductionA1 >= reductionA2) ? 'Setup 1' : 'Setup 2';
       }
 
       // Only one fixed active
