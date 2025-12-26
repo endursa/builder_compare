@@ -2,721 +2,321 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Last War - Build Time Comparison by Endursa</title>
+  <title>Last War – Build Time Comparison by Endursa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
     :root{
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background:#0f172a;
+      color:#e5e7eb;
     }
-    body{ margin:0; padding:0; display:flex; justify-content:center; }
+    body{ margin:0; display:flex; justify-content:center; }
     .container{ max-width:1100px; width:100%; padding:1.5rem; }
-    h1{ font-size:1.6rem; margin-bottom:0.75rem; color:#f9fafb; }
-    .subtitle{ color:#9ca3af; margin-bottom:1.0rem; font-size:0.9rem; }
-    .card{ background:#020617; border-radius:1rem; padding:1.25rem; box-shadow:0 20px 40px rgba(0,0,0,0.4); border:1px solid #1f2937; }
-    .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1rem; margin-bottom:1rem; }
-    .field-group-title{ font-weight:600; margin-bottom:0.4rem; color:#e5e7eb; display:flex; align-items:center; gap:0.5rem; }
-    .field-row{ display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.35rem; }
-    label{ font-size:0.8rem; color:#9ca3af; display:block; }
-    input, .small-text{ background:#020617; border-radius:0.5rem; border:1px solid #374151; padding:0.4rem 0.55rem; color:#e5e7eb; font-size:0.85rem; width:100%; box-sizing:border-box; }
-    input:focus{ outline:none; border-color:#22c55e; box-shadow:0 0 0 1px rgba(34,197,94,0.5); }
-    input[disabled]{ opacity:0.6; cursor:not-allowed; }
-    .inline-input{ max-width:90px; }
-    .time-inputs{ display:flex; gap:0.5rem; align-items:center; }
-    .time-inputs input{ max-width:90px; text-align:center; }
-    .checkbox-row{ display:flex; align-items:center; gap:0.5rem; }
-    .button-row{ display:flex; gap:0.75rem; flex-wrap:wrap; margin:0.5rem 0 1rem; align-items:center; }
-    button{ border-radius:999px; border:1px solid #22c55e; background:#16a34a; color:white; padding:0.45rem 1.1rem; font-size:0.9rem; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:0.3rem; }
-    button:hover{ background:#22c55e; }
-    .break-even{ font-size:0.9rem; color:#e5e7eb; }
-    .break-even span{ font-weight:600; color:#4ade80; }
-    .recommend{ margin-left:1rem; font-size:0.9rem; color:#cbd5e1; }
+    h1{ font-size:1.6rem; margin-bottom:.5rem; }
+    .subtitle{ color:#9ca3af; font-size:.9rem; margin-bottom:1rem; }
+
+    .card{
+      background:#020617;
+      border-radius:1rem;
+      padding:1.25rem;
+      border:1px solid #1f2937;
+      box-shadow:0 20px 40px rgba(0,0,0,.4);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+      gap:1rem;
+    }
+
+    label{ font-size:.8rem; color:#9ca3af; display:block; }
+    input{
+      width:100%;
+      padding:.4rem .55rem;
+      background:#020617;
+      border:1px solid #374151;
+      border-radius:.5rem;
+      color:#e5e7eb;
+      font-size:.85rem;
+    }
+    input:focus{
+      outline:none;
+      border-color:#22c55e;
+      box-shadow:0 0 0 1px rgba(34,197,94,.5);
+    }
+    input[disabled]{ opacity:.6; }
+
+    .inline{ max-width:90px; }
+    .row{ display:flex; gap:.5rem; flex-wrap:wrap; }
+    .title{
+      font-weight:600;
+      margin-bottom:.4rem;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+    }
+
+    .results{
+      display:flex;
+      gap:1rem;
+      flex-wrap:wrap;
+      margin:.75rem 0;
+    }
+    .pill{
+      background:#071125;
+      border:1px solid #263247;
+      padding:.35rem .6rem;
+      border-radius:.5rem;
+      font-size:.85rem;
+    }
+
+    .recommend{
+      margin:.5rem 0;
+      color:#cbd5e1;
+      font-size:.9rem;
+    }
     .recommend strong{ color:#fef3c7; }
-    .error{ color:#f97373; font-size:0.85rem; margin-top:0.25rem; }
-    .muted{ font-size:0.85rem; color:#9ca3af; padding:0.45rem 0.55rem; display:inline-block; }
-    .results-row{ display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem; }
-    .result-pill{ background:#071125; border:1px solid #263247; padding:0.35rem 0.6rem; border-radius:0.5rem; color:#e5e7eb; font-size:0.85rem; }
+
     .chart-wrap{
-      position: relative;
-      width: 100%;
-      min-height: 320px;
-      height: 40vh;
-      max-height: 640px;
-      margin: 0 auto;
+      position:relative;
+      width:100%;
+      height:40vh;
+      min-height:300px;
+      max-height:650px;
     }
-    .chart-wrap canvas{
-      width:100% !important;
-      height:100% !important;
-      display:block;
-    }
-    @media (max-width: 640px){
+    canvas{ width:100%!important; height:100%!important; }
+
+    .error{ color:#f97373; font-size:.85rem; }
+
+    @media(max-width:640px){
       h1{ font-size:1.25rem; }
-      .subtitle{ font-size:0.85rem; }
-      .chart-wrap{ min-height: 260px; height: 50vh; }
-      button{ padding:0.35rem 0.9rem; font-size:0.85rem; }
-      .results-row{ gap:0.5rem; }
-      .recommend{ display:block; margin-left:0.25rem; margin-top:0.25rem; }
+      .chart-wrap{ height:50vh; }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>Last War - Build Time Comparison by Endursa</h1>
-    <p class="subtitle">
-      Compare two fixed reductions with a percentage-based reduction (fixed at <strong>0.5%</strong> per helper).
-      The second fixed setup can be enabled/disabled via the checkbox (next to the title and disabled by default).
-      Tooltips and axes display all times consistently in <code>d hh:mm</code> format.
-    </p>
+<div class="container">
+  <h1>Last War – Build Time Comparison</h1>
+  <p class="subtitle">
+    Fixed reductions vs. percentage reduction (0.5% per helper).
+    When Setup 2 is enabled, only the higher-helper setup competes against percent reduction.
+  </p>
 
-    <div class="card">
-      <!-- Build time input (days / hours / minutes) -->
-      <div style="margin-bottom:0.75rem;">
-        <div class="field-group-title">Original build time</div>
-        <div class="field-row time-inputs" style="align-items:center;">
-          <div style="display:flex; gap:0.5rem; width:100%; max-width:520px;">
-            <div>
-              <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Days</label>
-              <input id="inputDays" class="inline-input" type="number" min="0" value="2" />
-            </div>
-            <div>
-              <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Hours</label>
-              <input id="inputHours" class="inline-input" type="number" min="0" max="23" value="3" />
-            </div>
-            <div>
-              <label style="font-size:0.75rem;color:#9ca3af;margin:0 0 4px 0;">Minutes</label>
-              <input id="inputMinutes" class="inline-input" type="number" min="0" max="59" value="40" />
-            </div>
-            <div style="display:flex;align-items:flex-end;">
-              <button id="calcBtn" style="height:38px;">Calculate results</button>
-            </div>
-          </div>
-        </div>
+  <div class="card">
 
-        <!-- numeric results -->
-        <div class="results-row" id="resultsRow" aria-live="polite">
-          <div class="result-pill" id="resultFixed1">Setup 1: —</div>
-          <div class="result-pill" id="resultFixed2">Setup 2: —</div>
-          <div class="result-pill" id="resultPercent">Percent: —</div>
-        </div>
-        
-        <!-- Recommendation shown below calculated times -->
-        <div class="recommend" id="recommendUnderResults"><strong>Recommendation:</strong> —</div>
+    <!-- Build time input -->
+    <div class="title">Original build time</div>
+    <div class="row">
+      <div>
+        <label>Days</label>
+        <input id="inputDays" class="inline" type="number" min="0" value="2">
       </div>
-
-      <div class="grid">
-        <!-- Fixed setup 1 -->
-        <div>
-          <div class="field-group-title">Setup 1</div>
-          <div class="field-row">
-            <div>
-              <label for="fixedHelpers1">Helpers</label>
-              <input id="fixedHelpers1" type="number" min="1" value="30" />
-            </div>
-          </div>
-          <div class="field-row">
-            <div>
-              <label for="fixedMinutes1">Minutes per helper</label>
-              <input id="fixedMinutes1" class="inline-input" type="number" min="0" value="39" />
-            </div>
-            <div>
-              <label for="fixedSeconds1">Seconds per helper</label>
-              <input id="fixedSeconds1" class="inline-input" type="number" min="0" max="59" value="12" />
-            </div>
-          </div>
-        </div>
-        <!-- Fixed setup 2 with checkbox -->
-        <div>
-          <div class="field-group-title">
-            <span>Setup 2</span>
-            <label class="checkbox-row" style="margin-left:auto;">
-              <input id="enableFixed2" type="checkbox" />
-              <span style="margin-left:6px;color:#9ca3af;font-size:0.9rem;">enable</span>
-            </label>
-          </div>
-          <div class="field-row">
-            <div>
-              <label for="fixedHelpers2">Helpers</label>
-              <input id="fixedHelpers2" type="number" min="1" value="32" />
-            </div>
-          </div>
-          <div class="field-row">
-            <div>
-              <label for="fixedMinutes2">Minutes per helper</label>
-              <input id="fixedMinutes2" class="inline-input" type="number" min="0" value="27" />
-            </div>
-            <div>
-              <label for="fixedSeconds2">Seconds per helper</label>
-              <input id="fixedSeconds2" class="inline-input" type="number" min="0" max="59" value="36" />
-            </div>
-          </div>
-        </div>
-        <!-- Percent setup (fixed 0.5%) - helpers forced to max of fixed helpers -->
-        <div>
-          <div class="field-group-title">Percent reduction</div>
-          <div class="field-row">
-            <div>
-              <label for="percentHelpers">Helpers (auto = max of fixed helpers)</label>
-              <input id="percentHelpers" type="number" min="1" value="32" disabled />
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="muted">Percent per helper: <strong>0.5%</strong></div>
-          </div>
-        </div>
+      <div>
+        <label>Hours</label>
+        <input id="inputHours" class="inline" type="number" min="0" max="23" value="3">
       </div>
-
-      <div class="button-row">
-        <button id="plotBtn">▶ Generate plot</button>
-        <div style="display:flex;align-items:center;">
-          <div class="break-even" id="breakEvenText">Break-even: <span>–</span></div>
-          <div class="recommend" id="recommendText"><strong>Recommendation:</strong> —</div>
-        </div>
-      </div>
-
-      <div class="error" id="errorText"></div>
-
-      <div class="chart-wrap">
-        <canvas id="chart"></canvas>
+      <div>
+        <label>Minutes</label>
+        <input id="inputMinutes" class="inline" type="number" min="0" max="59" value="40">
       </div>
     </div>
+
+    <div class="results">
+      <div class="pill" id="resultFixed1">Setup 1: —</div>
+      <div class="pill" id="resultFixed2">Setup 2: —</div>
+      <div class="pill" id="resultPercent">Percent: —</div>
+    </div>
+
+    <div class="recommend" id="recommendUnder"><strong>Recommendation:</strong> —</div>
+
+    <div class="grid">
+
+      <!-- Setup 1 -->
+      <div>
+        <div class="title">Setup 1</div>
+        <label>Helpers</label>
+        <input id="fixedHelpers1" type="number" min="1" value="30">
+        <div class="row">
+          <div>
+            <label>Minutes / helper</label>
+            <input id="fixedMinutes1" class="inline" type="number" value="39">
+          </div>
+          <div>
+            <label>Seconds / helper</label>
+            <input id="fixedSeconds1" class="inline" type="number" value="12">
+          </div>
+        </div>
+      </div>
+
+      <!-- Setup 2 -->
+      <div>
+        <div class="title">
+          Setup 2
+          <label style="margin-left:auto;font-size:.8rem;">
+            <input id="enableFixed2" type="checkbox"> enable
+          </label>
+        </div>
+        <label>Helpers</label>
+        <input id="fixedHelpers2" type="number" min="1" value="32" disabled>
+        <div class="row">
+          <div>
+            <label>Minutes / helper</label>
+            <input id="fixedMinutes2" class="inline" type="number" value="27" disabled>
+          </div>
+          <div>
+            <label>Seconds / helper</label>
+            <input id="fixedSeconds2" class="inline" type="number" value="36" disabled>
+          </div>
+        </div>
+      </div>
+
+      <!-- Percent -->
+      <div>
+        <div class="title">Percent reduction</div>
+        <label>Helpers</label>
+        <input id="percentHelpers" type="number" min="1" value="32">
+        <div class="pill">0.5% per helper</div>
+      </div>
+
+    </div>
+
+    <div class="recommend" id="breakEvenText"><strong>Break-even:</strong> —</div>
+    <div class="error" id="errorText"></div>
+
+    <div class="chart-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+
   </div>
+</div>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    const chartCanvas = document.getElementById('chart');
-    const breakEvenText = document.getElementById('breakEvenText').querySelector('span');
-    const recommendText = document.getElementById('recommendText');
-    const errorText = document.getElementById('errorText');
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const FIXED_PERCENT_PER_HELPER = 0.5;
+const DEFAULT_POINTS = 1000;
+const DEFAULT_RANGE_DAYS = 10;
 
-    const enableFixed2El = document.getElementById('enableFixed2');
-    const fixedHelpers1El = document.getElementById('fixedHelpers1');
-    const fixedHelpers2El = document.getElementById('fixedHelpers2');
-    const fixedMinutes2El = document.getElementById('fixedMinutes2');
-    const fixedSeconds2El = document.getElementById('fixedSeconds2');
+const el = id => document.getElementById(id);
+let chart = null;
 
-    // Build time inputs and result displays
-    const inputDays = document.getElementById('inputDays');
-    const inputHours = document.getElementById('inputHours');
-    const inputMinutes = document.getElementById('inputMinutes');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultFixed1 = document.getElementById('resultFixed1');
-    const resultFixed2 = document.getElementById('resultFixed2');
-    const resultPercent = document.getElementById('resultPercent');
+function formatTime(sec){
+  sec = Math.max(0, Math.round(sec));
+  const d = Math.floor(sec/86400);
+  const h = Math.floor(sec%86400/3600);
+  const m = Math.floor(sec%3600/60);
+  return `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+}
 
-    const percentHelpersEl = document.getElementById('percentHelpers');
+function getInputSeconds(){
+  return (
+    (+el('inputDays').value||0)*86400 +
+    (+el('inputHours').value||0)*3600 +
+    (+el('inputMinutes').value||0)*60
+  );
+}
 
-    // default: Fixed2 disabled & inputs disabled
-    fixedHelpers2El.disabled = true;
-    fixedMinutes2El.disabled = true;
-    fixedSeconds2El.disabled = true;
+function updatePercentHelpers(){
+  if (!el('enableFixed2').checked) return;
+  el('percentHelpers').value = Math.max(
+    +el('fixedHelpers1').value||1,
+    +el('fixedHelpers2').value||1
+  );
+}
 
-	enableFixed2El.addEventListener('change', () => {
-	  const enabled = enableFixed2El.checked;
+function generateData(){
+  el('errorText').textContent = '';
 
-	  fixedHelpers2El.disabled = !enabled;
-	  fixedMinutes2El.disabled = !enabled;
-	  fixedSeconds2El.disabled = !enabled;
+  const h1 = +el('fixedHelpers1').value;
+  const h2 = el('enableFixed2').checked ? +el('fixedHelpers2').value : 0;
 
-	  if (enabled) {
-		percentHelpersEl.disabled = true;
-		updatePercentHelpers();
-	  } else {
-		percentHelpersEl.disabled = false;
-	  }
-	});
+  const r1 = h1 * ((+el('fixedMinutes1').value||0)*60 + (+el('fixedSeconds1').value||0));
+  const r2 = h2 * ((+el('fixedMinutes2').value||0)*60 + (+el('fixedSeconds2').value||0));
 
-    // update percentHelpers to be max of fixed helpers
-	function updatePercentHelpers() {
-	  if (!enableFixed2El.checked) return;
+  const pHelpers = +el('percentHelpers').value;
+  if (!(h1>0 && pHelpers>0)) return null;
 
-	  const h1 = Number(fixedHelpers1El.value) || 0;
-	  const h2 = Number(fixedHelpers2El.value) || 0;
-	  const maxH = Math.max(h1, h2, 1);
-	  percentHelpersEl.value = String(maxH);
-	}
+  const factor = Math.pow(1 - FIXED_PERCENT_PER_HELPER/100, pHelpers);
 
-    // listen for helper changes
-    fixedHelpers1El.addEventListener('input', updatePercentHelpers);
-    fixedHelpers2El.addEventListener('input', updatePercentHelpers);
+  let c1 = r1/(1-factor);
+  let c2 = h2>0 ? r2/(1-factor) : null;
 
-    // initialize percentHelpers
-    updatePercentHelpers();
-	percentHelpersEl.disabled = enableFixed2El.checked;
-    let chartInstance = null;
-    const FIXED_PERCENT_PER_HELPER = 0.5;
-    const DEFAULT_POINTS = 1000; // internal resolution
-    const DEFAULT_RANGE_DAYS = 10; // fallback when no break-evens
+  if (h2>0){
+    if (h1<h2) c1=null;
+    if (h2<h1) c2=null;
+  }
 
-    function formatTime(seconds) {
-      seconds = Math.max(0, Math.round(seconds));
-      const d = Math.floor(seconds / 86400);
-      const h = Math.floor((seconds % 86400) / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      return `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+  const maxT = Math.max(
+    c1?c1*1.5:0,
+    c2?c2*1.5:0,
+    DEFAULT_RANGE_DAYS*86400
+  );
+
+  const pts1=[], pts2=[], ptsP=[];
+  for(let i=0;i<DEFAULT_POINTS;i++){
+    const t=i*maxT/(DEFAULT_POINTS-1);
+    pts1.push({x:t,y:Math.max(0,t-r1)});
+    if(h2>0) pts2.push({x:t,y:Math.max(0,t-r2)});
+    ptsP.push({x:t,y:t*factor});
+  }
+
+  return {pts1,pts2,ptsP,c1,c2,r1,r2,factor,h2};
+}
+
+function createChart(){
+  updatePercentHelpers();
+  const d = generateData();
+  if(!d) return;
+
+  const T = getInputSeconds();
+  el('resultFixed1').textContent = `Setup 1: ${formatTime(Math.max(0,T-d.r1))}`;
+  el('resultFixed2').textContent = d.h2
+    ? `Setup 2: ${formatTime(Math.max(0,T-d.r2))}`
+    : 'Setup 2: —';
+  el('resultPercent').textContent =
+    `Percent: ${formatTime(T*d.factor)}`;
+
+  el('breakEvenText').innerHTML =
+    `<strong>Break-even:</strong> ` +
+    [d.c1&&`Setup 1 vs %: ${formatTime(d.c1)}`,
+     d.c2&&`Setup 2 vs %: ${formatTime(d.c2)}`]
+    .filter(Boolean).join(' | ') || '—';
+
+  if(chart) chart.destroy();
+  chart = new Chart(el('chart'),{
+    type:'line',
+    data:{
+      datasets:[
+        {label:'Setup 1',data:d.pts1,borderColor:'#f59e0b',borderWidth:2,pointRadius:0},
+        d.h2&&{label:'Setup 2',data:d.pts2,borderColor:'#60a5fa',borderWidth:2,pointRadius:0},
+        {label:'Percent (0.5%)',data:d.ptsP,borderColor:'#4ade80',borderDash:[6,4],borderWidth:2,pointRadius:0}
+      ].filter(Boolean)
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false,
+      scales:{
+        x:{type:'linear',ticks:{callback:v=>formatTime(v)}},
+        y:{ticks:{callback:v=>formatTime(v)}}
+      }
     }
+  });
+}
 
-    // Convert the build-time inputs to seconds
-    function getInputTSeconds() {
-      const d = Math.max(0, Number(inputDays.value) || 0);
-      const h = Math.max(0, Number(inputHours.value) || 0);
-      const m = Math.max(0, Number(inputMinutes.value) || 0);
-      return d * 86400 + h * 3600 + m * 60;
-    }
+el('enableFixed2').addEventListener('change',()=>{
+  const en = el('enableFixed2').checked;
+  ['fixedHelpers2','fixedMinutes2','fixedSeconds2'].forEach(id=>el(id).disabled=!en);
+  el('percentHelpers').disabled = en;
+  createChart();
+});
 
-    function generateData() {
-      errorText.textContent = '';
+document.querySelectorAll('input').forEach(i=>{
+  i.addEventListener('input',createChart);
+});
 
-      const fixedHelpers1 = Number(fixedHelpers1El.value);
-      const fixedMinutes1 = Number(document.getElementById('fixedMinutes1').value);
-      const fixedSeconds1 = Number(document.getElementById('fixedSeconds1').value);
-
-      const fixed2enabled = enableFixed2El.checked;
-      const fixedHelpers2 = Number(fixedHelpers2El.value);
-      const fixedMinutes2 = Number(document.getElementById('fixedMinutes2').value);
-      const fixedSeconds2 = Number(document.getElementById('fixedSeconds2').value);
-
-      // percent helpers is always the max of helpers entered
-      const percentHelpers = Number(percentHelpersEl.value);
-      const percentPerHelper = FIXED_PERCENT_PER_HELPER; // fixed
-
-      const pointsCount = DEFAULT_POINTS;
-
-      if (!(fixedHelpers1 > 0 && percentHelpers > 0 && percentPerHelper > 0)) {
-        errorText.textContent = 'Helpers and percent values must be positive.';
-        return null;
-      }
-      if (fixed2enabled && !(fixedHelpers2 > 0)) {
-        errorText.textContent = 'If Fixed2 is enabled, Fixed2 helpers must be > 0.';
-        return null;
-      }
-
-      // reductions in seconds (A)
-      const reductionA1 = fixedHelpers1 * (fixedMinutes1 * 60 + fixedSeconds1);
-      const reductionA2 = fixed2enabled ? fixedHelpers2 * (fixedMinutes2 * 60 + fixedSeconds2) : 0;
-
-      // multiplicative factor B (percent)
-      const factorB = Math.pow(1 - percentPerHelper / 100, percentHelpers);
-      if (!(factorB > 0 && factorB < 1)) {
-        errorText.textContent = 'Invalid percent factor.';
-        return null;
-      }
-
-      // analytic break-evens (seconds) for each fixed vs percent
-      const crossover1 = (1 - factorB) !== 0 ? reductionA1 / (1 - factorB) : NaN;
-      const crossover2 = fixed2enabled ? ((1 - factorB) !== 0 ? reductionA2 / (1 - factorB) : NaN) : null;
-	  
-	  let effectiveCrossover1 = crossover1;
-	  let effectiveCrossover2 = crossover2;
-
-	  if (fixed2enabled) {
-		if (fixedHelpers1 < fixedHelpers2) {
-			effectiveCrossover1 = null;
-		} else if (fixedHelpers2 < fixedHelpers1) {
-			effectiveCrossover2 = null;
-		}
-	  }
-      // AUTO-RANGE: choose tMax so that break-even(s) are visible
-      const candidates = [];
-      if (isFinite(crossover1) && crossover1 > 0) candidates.push(crossover1 * 1.5);
-      if (isFinite(crossover2) && crossover2 > 0) candidates.push(crossover2 * 1.5);
-      if (!candidates.length) candidates.push(DEFAULT_RANGE_DAYS * 24 * 3600);
-      const tMin = 0;
-      const tMax = Math.max(...candidates, 1);
-      const step = (tMax - tMin) / Math.max(1, pointsCount - 1);
-
-      const pts = [];
-      for (let i = 0; i < pointsCount; i++) {
-        const t = tMin + i * step; // build time in seconds
-        const tFixed1 = Math.max(0, t - reductionA1); // result in seconds
-        const tFixed2 = fixed2enabled ? Math.max(0, t - reductionA2) : null;
-        const tPercent = t * factorB;
-        pts.push({
-          x: t,
-          fixed1Sec: tFixed1,
-          fixed2Sec: tFixed2,
-          percentSec: tPercent
-        });
-      }
-
-      const fixedDataset1 = pts.map(p => ({ x: p.x, y: p.fixed1Sec }));
-      const fixedDataset2 = fixed2enabled ? pts.map(p => ({ x: p.x, y: p.fixed2Sec })) : [];
-      const percentDataset = pts.map(p => ({ x: p.x, y: p.percentSec }));
-
-	  return {
-		  fixedDataset1,
-		  fixedDataset2,
-		  percentDataset,
-		  crossover1: effectiveCrossover1,
-		  crossover2: effectiveCrossover2,
-		  reductionA1,
-		  reductionA2,
-		  factorB,
-		  fixed2enabled,
-		  fixedHelpers1,
-		  fixedHelpers2
-	  };
-    }
-
-    // Decide recommendation string per your rule
-    function decideRecommendation(T, data) {
-      const { crossover1, crossover2, fixedHelpers1, fixedHelpers2, reductionA1, reductionA2, fixed2enabled } = data;
-
-      // helper helper
-      function chooseLowerHelpersHigherReduction() {
-        // choose config with lower helpers; if equal choose larger reductionA
-        if (!fixed2enabled) return 'Setup 1';
-        if (fixedHelpers1 < fixedHelpers2) return 'Setup 1';
-        if (fixedHelpers2 < fixedHelpers1) return 'Setup 2';
-        // equal helpers -> pick one with larger reduction
-        return (reductionA1 >= reductionA2) ? 'Setup 1' : 'Setup 2';
-      }
-      function chooseHigherHelpers() {
-        if (!fixed2enabled) return 'Percent (higher-helpers behavior)';
-        if (fixedHelpers1 > fixedHelpers2) return 'Setup 1';
-        if (fixedHelpers2 > fixedHelpers1) return 'Setup 2';
-        // equal -> choose larger reduction
-        return (reductionA1 >= reductionA2) ? 'Setup 1' : 'Setup 2';
-      }
-
-      // Only one fixed active
-      if (!fixed2enabled) {
-        if (crossover1 == null) {
-          // no meaningful crossover => fallback to percent behavior if factor weird; else choose fixed
-          return 'Fixed1 (no valid break-even)';
-        }
-        if (T < crossover1) {
-          return 'Use Setup 1 (below break-even)';
-        } else {
-          return 'Use percent-based reduction (above break-even)';
-        }
-      }
-
-      // both fixed enabled
-      const c1 = crossover1;
-      const c2 = crossover2;
-      // If neither has valid crossovers, fallback
-      if (!c1 && !c2) return 'No valid break-even points; choose the configuration you prefer.';
-      // If T is below both BE
-      if ((c1 && T < c1) && (c2 && T < c2)) {
-        const pick = chooseLowerHelpersHigherReduction();
-        return `Build time is below both break-evens → recommend ${pick} (lower helpers & higher reduction).`;
-      }
-      // If T above both BE
-      if ((c1 && T > c1) && (c2 && T > c2)) {
-        const pick = chooseHigherHelpers();
-        return `Build time is above both break-evens → recommend ${pick} (higher helper count).`;
-      }
-      // Mixed / between: try to pick fixed whose crossover is still > T (i.e. fixed still better)
-      const candidates = [];
-      if (c1 && T < c1) candidates.push({ id: 'Fixed1', crossover: c1 });
-      if (c2 && T < c2) candidates.push({ id: 'Fixed2', crossover: c2 });
-      if (candidates.length === 1) {
-        return `Build time is between break-evens — recommend ${candidates[0].id} (its break-even is above the build time).`;
-      }
-      if (candidates.length === 2) {
-        // shouldn't happen because handled above, but fallback
-        return 'Build time falls between break-evens — both fixed options could be valid; choose the one with fewer helpers for shorter builds.';
-      }
-      // No fixed prefers fixed at this T — prefer percent/higher-helpers fallback
-      const pick = chooseHigherHelpers();
-      return `Build time falls between break-evens — recommend ${pick} (prefer higher-helpers / percent-based).`;
-    }
-
-    // vertical lines plugin (stacked labels)
-    const verticalLinePlugin = {
-      id: 'verticalLines',
-      afterDraw: (chart) => {
-        const breakpoints = chart.config._breakpoints || [];
-        if (!breakpoints.length) return;
-        const ctx = chart.ctx;
-        const xScale = chart.scales['x'];
-        const top = chart.chartArea.top;
-        const bottom = chart.chartArea.bottom;
-        const chartLeft = chart.chartArea.left;
-        const chartRight = chart.chartArea.right;
-
-        const items = breakpoints
-          .filter(v => v && typeof v.x === 'number' && v.x >= xScale.min && v.x <= xScale.max)
-          .map(v => {
-            const px = xScale.getPixelForValue(v.x);
-            const lbl = (v.label || '') + ' — ' + formatTime(v.x);
-            ctx.font = v.font || '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
-            const w = ctx.measureText(lbl).width;
-            return { v, px, lbl, w };
-          });
-
-        if (!items.length) return;
-
-        items.sort((a,b) => a.px - b.px);
-
-        const CLUSTER_THRESHOLD = 64;
-        const clusters = [];
-        let currentCluster = [items[0]];
-        for (let i = 1; i < items.length; i++) {
-          const prev = items[i - 1];
-          const cur = items[i];
-          if (cur.px - prev.px <= CLUSTER_THRESHOLD) currentCluster.push(cur);
-          else { clusters.push(currentCluster); currentCluster = [cur]; }
-        }
-        clusters.push(currentCluster);
-
-        clusters.forEach(cluster => {
-          const LINE_LABEL_GAP = 6;
-          const LABEL_LINE_HEIGHT = 14;
-          const totalHeight = cluster.length * LABEL_LINE_HEIGHT + (cluster.length - 1) * LINE_LABEL_GAP;
-          const baseYTop = top + 14;
-          let startY = baseYTop;
-          const bottomMost = startY + totalHeight - LABEL_LINE_HEIGHT;
-          if (bottomMost > bottom - 4) startY -= (bottomMost - (bottom - 4));
-          startY = Math.max(startY, top + 6);
-
-          cluster.forEach((it, idx) => {
-            const px = it.px;
-            const textY = startY + idx * (LABEL_LINE_HEIGHT + LINE_LABEL_GAP);
-            let textX = px + 6;
-            if (textX + it.w > chartRight - 6) {
-              const leftX = px - 6 - it.w;
-              if (leftX > chartLeft + 6) textX = leftX;
-              else textX = Math.max(chartLeft + 6, chartRight - it.w - 6);
-            }
-            it.drawPos = { textX, textY, px };
-          });
-        });
-
-        items.forEach(it => {
-          const v = it.v;
-          const px = it.drawPos.px;
-          ctx.save();
-          ctx.beginPath();
-          ctx.strokeStyle = v.color || '#4ade80';
-          ctx.lineWidth = Math.max(1, (v.width || 2));
-          ctx.setLineDash(v.dash || [6,4]);
-          ctx.moveTo(px, top);
-          ctx.lineTo(px, bottom);
-          ctx.stroke();
-
-          if (it.lbl) {
-            ctx.setLineDash([]);
-            ctx.font = v.font || '12px system-ui, -apple-system, "Segoe UI", Roboto, Arial';
-            ctx.fillStyle = v.color || '#4ade80';
-            ctx.fillText(it.lbl, it.drawPos.textX, it.drawPos.textY);
-          }
-          ctx.restore();
-        });
-      }
-    };
-    Chart.register(verticalLinePlugin);
-
-    function makeChartOptions(width) {
-      const isSmall = width <= 480;
-      const isMedium = width <= 768;
-      return {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        devicePixelRatio: Math.max(1, window.devicePixelRatio || 1),
-        interaction: { mode: 'nearest', intersect: false },
-        layout: { padding: { top: 8, right: 8, bottom: 6, left: 6 } },
-        scales: {
-          x: {
-            type: 'linear',
-            title: { display: true, text: 'Build time', color: '#e5e7eb', font: { size: isSmall ? 10 : 12 } },
-            ticks: {
-              callback: function(value){ return formatTime(value); },
-              maxRotation: 0,
-              autoSkip: true,
-              maxTicksLimit: isSmall ? 4 : (isMedium ? 6 : 8),
-              color: '#9ca3af',
-              font: { size: isSmall ? 9 : 11 }
-            },
-            grid: { color: '#0b1220' }
-          },
-          y: {
-            type: 'linear',
-            title: { display: true, text: 'Resulting build time (d hh:mm)', color: '#e5e7eb', font: { size: isSmall ? 10 : 12 } },
-            ticks: {
-              callback: function(value){ return formatTime(value); },
-              color: '#9ca3af',
-              font: { size: isSmall ? 9 : 11 }
-            },
-            grid: { color: '#0b1220' }
-          }
-        },
-        plugins: {
-          legend: { labels: { color: '#e5e7eb', font: { size: isSmall ? 10 : 12 } } },
-          tooltip: {
-            padding: 8,
-            bodySpacing: 6,
-            titleFont: { size: isSmall ? 11 : 13 },
-            bodyFont: { size: isSmall ? 11 : 12 },
-            callbacks: {
-              title: (items) => {
-                if (!items.length) return '';
-                const seconds = items[0].parsed.x;
-                return 'Build time: ' + formatTime(seconds);
-              },
-              label: (ctx) => {
-                const seconds = ctx.parsed.y;
-                return `${ctx.dataset.label}: ${formatTime(seconds)}`;
-              }
-            }
-          }
-        }
-      };
-    }
-
-    // Create chart and marker datasets; ALWAYS auto-range to break-even (fallback to DEFAULT_RANGE_DAYS)
-    function createChart() {
-      // ensure percent helpers reflect current helper inputs
-      updatePercentHelpers();
-
-      const data = generateData();
-      if (!data) return;
-      const { fixedDataset1, fixedDataset2, percentDataset, crossover1, crossover2, reductionA1, reductionA2, factorB, fixed2enabled } = data;
-
-      // compute single-point results for input T
-      const T = getInputTSeconds();
-      const resFixed1 = Math.max(0, T - reductionA1);
-      const resFixed2 = fixed2enabled ? Math.max(0, T - reductionA2) : null;
-      const resPercent = Math.max(0, T * factorB);
-
-      // update numeric result pills
-      resultFixed1.textContent = 'Setup 1: ' + formatTime(resFixed1);
-      resultFixed2.textContent = fixed2enabled ? ('Setup 2: ' + formatTime(resFixed2)) : 'Setup 2: —';
-      resultPercent.textContent = 'Percent: ' + formatTime(resPercent);
-
-      // Break-even text
-      const texts = [];
-      if (crossover1) texts.push('Fixed1: ' + formatTime(crossover1));
-      if (crossover2) texts.push('Fixed2: ' + formatTime(crossover2));
-      breakEvenText.textContent = texts.length ? texts.join(' | ') : 'no positive break-even';
-
-      // decide recommendation and render
-      const rec = decideRecommendation(T, Object.assign({}, data));
-      recommendText.innerHTML = `<strong>Recommendation:</strong> ${rec}`;
-      
-      // also update the recommendation panel under the numeric results
-      const recUnder = document.getElementById('recommendUnderResults');  
-      if (recUnder) recUnder.innerHTML = `<strong>Recommendation:</strong> ${rec}`;
-
-      // breakpoints
-      const breakpoints = [];
-      if (crossover1) breakpoints.push({ x: crossover1, color: '#f59e0b', label: 'BE Setup 1' });
-      if (fixed2enabled && crossover2) breakpoints.push({ x: crossover2, color: '#60a5fa', label: 'BE Setup 2' });
-
-      // datasets: curves
-      const datasets = [
-        {
-          label: 'Setup 1',
-          data: fixedDataset1,
-          borderWidth: 2,
-          tension: 0.15,
-          pointRadius: 0,
-          pointHitRadius: 0,
-          borderColor: '#f59e0b',
-          spanGaps: false
-        }
-      ];
-      if (fixed2enabled) {
-        datasets.push({
-          label: 'Setup 2',
-          data: fixedDataset2,
-          borderWidth: 2,
-          tension: 0.15,
-          pointRadius: 0,
-          pointHitRadius: 0,
-          borderColor: '#60a5fa',
-          spanGaps: false
-        });
-      }
-      datasets.push({
-        label: 'Percent reduction (0.5% per helper)',
-        data: percentDataset,
-        borderWidth: 2,
-        borderDash: [6,4],
-        tension: 0.15,
-        pointRadius: 0,
-        pointHitRadius: 0,
-        borderColor: '#4ade80',
-        spanGaps: false
-      });
-
-      // marker datasets (single hollow points) — labels as requested
-      datasets.push({
-        label: 'Build time setup 1',
-        data: [{ x: T, y: resFixed1 }],
-        showLine: false,
-        pointStyle: 'circle',
-        pointRadius: 7,
-        pointHoverRadius: 9,
-        backgroundColor: 'transparent',
-        borderColor: '#f59e0b',
-        borderWidth: 2,
-        order: 999
-      });
-
-      datasets.push({
-        label: 'build time percentage',
-        data: [{ x: T, y: resPercent }],
-        showLine: false,
-        pointStyle: 'circle',
-        pointRadius: 7,
-        pointHoverRadius: 9,
-        backgroundColor: 'transparent',
-        borderColor: '#4ade80',
-        borderWidth: 2,
-        order: 999
-      });
-
-      if (fixed2enabled) {
-        datasets.push({
-          label: 'build time setup 2',
-          data: [{ x: T, y: resFixed2 }],
-          showLine: false,
-          pointStyle: 'circle',
-          pointRadius: 7,
-          pointHoverRadius: 9,
-          backgroundColor: 'transparent',
-          borderColor: '#60a5fa',
-          borderWidth: 2,
-          order: 999
-        });
-      }
-
-      // destroy previous chart if exists
-      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-
-      // compute options based on wrapper width
-      const wrap = document.querySelector('.chart-wrap');
-      const opts = makeChartOptions(wrap.clientWidth);
-
-      chartInstance = new Chart(chartCanvas, {
-        type: 'line',
-        data: { datasets },
-        options: opts
-      });
-
-      // attach breakpoints for plugin and refresh
-      chartInstance.config._breakpoints = breakpoints;
-      chartInstance.update();
-    }
-
-    // wire interactions
-    document.getElementById('plotBtn').addEventListener('click', createChart);
-    calcBtn.addEventListener('click', createChart);
-
-    // recreate chart on resize with throttling
-    let resizeTimer = null;
-    function handleResize() {
-      if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { createChart(); }, 120);
-    }
-    window.addEventListener('resize', handleResize);
-
-    // initial render
-    createChart();
-  </script>
+createChart();
+</script>
 </body>
 </html>
