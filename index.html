@@ -68,7 +68,7 @@ canvas{ width:100%!important; height:100%!important; }
 <div class="container">
 <div class="card">
 
-<h2>Last War – Build Time Comparison</h2>
+<h2>Last War – Build Time Comparison by Endursa</h2>
 
 <!-- Original build time -->
 <div class="row">
@@ -91,7 +91,8 @@ canvas{ width:100%!important; height:100%!important; }
 
 <!-- Setup 1 -->
 <div class="row">
-  <div><label>Setup 1 helpers</label><br><input id="h1" class="inline" type="number" value="30"></div>
+  Setup 1: 
+  <div><label>Number of helpers</label><br><input id="h1" class="inline" type="number" value="30"></div>
   <div><label>Min/helper</label><br><input id="m1" class="inline" type="number" value="39"></div>
   <div><label>Sec/helper</label><br><input id="s1" class="inline" type="number" value="12"></div>
 </div>
@@ -102,19 +103,20 @@ canvas{ width:100%!important; height:100%!important; }
 </div>
 
 <div class="row">
-  <div><label>Setup 2 helpers</label><br><input id="h2" class="inline" type="number" value="32" disabled></div>
+  Setup 2:
+  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" value="32" disabled></div>
   <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" value="27" disabled></div>
   <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" value="36" disabled></div>
 </div>
 
 <!-- Percent -->
 <div class="row">
-  <div><label>% helpers</label><br><input id="ph" class="inline" type="number" value="32"></div>
+  <div><label>Maximum number of helpers</label><br><input id="ph" class="inline" type="number" value="32"></div>
   <div class="pill">0.5% / helper</div>
 </div>
 
 <div class="recommend" id="breakeven">
-  <strong>Break-even:</strong> —
+  <strong>Break-even (max. time reduction vs. max. helpers):</strong> —
 </div>
 
 <div class="chart-wrap">
@@ -207,7 +209,7 @@ function recalc(){
   const be = strongestTotalReduction / (1 - factor);
 
   $('breakeven').innerHTML =
-    `<strong>Break-even:</strong> ${strongestLabel} vs % (${ph} helpers): ${formatTime(be)}`;
+    `<strong>Break-even (max. time reduction vs. max. helpers):</strong> ${strongestLabel} vs % (${ph} helpers): ${formatTime(be)}`;
 
   const Tmax = Math.max(be*1.5, 864000);
   const d1=[], d2=[], dp=[];
