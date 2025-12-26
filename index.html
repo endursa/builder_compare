@@ -87,14 +87,27 @@ canvas{ width:100%!important; height:100%!important; }
   <strong>Recommendation:</strong> —
 </div>
 
+<div class="recommend" id="breakeven">
+  <strong>Break-even (max. time reduction vs. max. helpers):</strong> —
+</div>
+  
 <hr>
 
 <!-- Setup 1 -->
 <div class="row">
   Setup 1: 
-  <div><label>Number of helpers</label><br><input id="h1" class="inline" type="number" value="30"></div>
-  <div><label>Min/helper</label><br><input id="m1" class="inline" type="number" value="39"></div>
-  <div><label>Sec/helper</label><br><input id="s1" class="inline" type="number" value="12"></div>
+</div>
+  
+<div class="row">
+  <div><label>Number of helpers</label><br><input id="h1" class="inline" type="number" value="36"></div>
+  <div><label>Min/helper</label><br><input id="m1" class="inline" type="number" value="48"></div>
+  <div><label>Sec/helper</label><br><input id="s1" class="inline" type="number" value="54"></div>
+</div>
+
+<!-- Percent -->
+<div class="row">
+  <div><label>Maximum number of helpers</label><br><input id="ph" class="inline" type="number" value="32"></div>
+  <div class="pill">0.5% / helper</div>
 </div>
 
 <!-- Setup 2 -->
@@ -104,19 +117,12 @@ canvas{ width:100%!important; height:100%!important; }
 
 <div class="row">
   Setup 2:
-  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" value="32" disabled></div>
-  <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" value="27" disabled></div>
-  <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" value="36" disabled></div>
 </div>
 
-<!-- Percent -->
 <div class="row">
-  <div><label>Maximum number of helpers</label><br><input id="ph" class="inline" type="number" value="32"></div>
-  <div class="pill">0.5% / helper</div>
-</div>
-
-<div class="recommend" id="breakeven">
-  <strong>Break-even (max. time reduction vs. max. helpers):</strong> —
+  <div><label>Number of helpers</label><br><input id="h2" class="inline" type="number" value="38" disabled></div>
+  <div><label>Min/helper</label><br><input id="m2" class="inline" type="number" value="33" disabled></div>
+  <div><label>Sec/helper</label><br><input id="s2" class="inline" type="number" value="42" disabled></div>
 </div>
 
 <div class="chart-wrap">
